@@ -9,10 +9,12 @@ License: MIT + file LICENSE
 URL: https://github.com/esqLABS/cstApp
 BugReports: https://github.com/esqLABS/cstApp/issues
 Imports: 
+    bsicons,
+    bslib,
     config,
     golem,
     shiny,
-    bslib
+    shinyWidgets
 Suggests: 
     spelling,
     testthat (>= 3.0.0)

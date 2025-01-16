@@ -2,15 +2,37 @@
 #'
 #' @param request Internal parameter for `{shiny}`.
 #'     DO NOT REMOVE.
-#' @import shiny
+#' @import shiny bslib bsicons
 #' @noRd
 app_ui <- function(request) {
   tagList(
     # Leave this function for adding external resources
     golem_add_external_resources(),
     # Your application UI logic
-    fluidPage(
-      golem::golem_welcome_page() # Remove this line to start building your UI
+    page_sidebar(
+      title = "Clinical Trial Simulator",
+      sidebar = sidebar(
+        width = "30vw",
+        accordion(
+          open = TRUE,
+          style = "min-height: 70vh; max-height: 70vh; overflow-y: auto;",
+          accordion_panel(
+            "Victim",icon = bs_icon("capsule"),
+            mod_victim_ui("victim_1")
+          ),
+          accordion_panel(
+            "Individual", icon = bs_icon("person-fill"),
+            mod_individual_ui("individual_1")
+          ),
+          accordion_panel(
+            "Perpetrator", icon = bs_icon("prescription"),
+            mod_perpetrator_ui("perpetrator_1")
+          )
+        ),
+        input_task_button("run", "Run Simulation", icon = bs_icon("play"))
+      ),
+      mod_results_values_ui("results_values_1"),
+      mod_results_plot_ui("results_plot_1"),
     )
   )
 }
