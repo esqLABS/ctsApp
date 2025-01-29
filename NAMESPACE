@@ -3,6 +3,8 @@
 export(run_app)
 import(bsicons)
 import(bslib)
+import(purrr)
+import(shinipsum)
 import(shiny)
 import(shinyWidgets)
 importFrom(golem,activate_js)

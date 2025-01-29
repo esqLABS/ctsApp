@@ -13,6 +13,8 @@ Imports:
     bslib,
     config,
     golem,
+    purrr,
+    shinipsum,
     shiny,
     shinyWidgets
 Suggests: 
