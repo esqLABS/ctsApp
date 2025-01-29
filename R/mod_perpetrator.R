@@ -11,13 +11,13 @@ mod_perpetrator_ui <- function(id) {
   ns <- NS(id)
   tagList(
     selectInput(
-      ns("perpetrator_compound"), "Compound",
+      ns("perp_compound"), "Compound",
       c("Rifampicin", "Midazolam", "Add Custom Compound"),
       selected = "Rifampicin"
     ),
     conditionalPanel(
       ns = ns,
-      condition = "input.perpetrator_compound == 'Add Custom Compound'",
+      condition = "input.perp_compound == 'Add Custom Compound'",
       fileInput(ns("compound_file"), "Upload Compound File", accept = ".json", multiple = FALSE)
     ),
     tagList(
@@ -27,8 +27,8 @@ mod_perpetrator_ui <- function(id) {
           width = 1/2,
           # style = css(grid_template_columns = "1fr 2fr"),
           gap = "10px",
-          numericInput(ns("victim_dose"), "Dose", value = 1),
-          selectInput(ns("victim_unit"), "Unit", c("mg", "g"), selected = "mg")
+          numericInput(ns("perp_dose"), "Dose", value = 1),
+          selectInput(ns("perp_unit"), "Unit", c("mg", "g"), selected = "mg")
         ),
         selectInput(ns("protocol"), "Protocol",
                     c("Once", "Daily", "Twice Daily"),
@@ -40,24 +40,37 @@ mod_perpetrator_ui <- function(id) {
         shinyWidgets::timeInput(ns("time"), "Intake Time", value = "08:00")
       )
     )
-# For custom compound, add a tab
-#     navset_pill(
-#       nav_panel(title = "Preloaded",
-# ),
-#       nav_panel(title = "Custom",
-#                 numericInput(ns("logp"), "LogP", value = 1),
-#                 numericInput(ns("uf"), "Fraction unbound", value=1/2)),
-#       footer =
-#     )
   )
 }
 
 #' perpetrator Server Functions
 #'
 #' @noRd
-mod_perpetrator_server <- function(id){
+mod_perpetrator_server <- function(id, r){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
+
+    observe({
+      r$inputs$perpetrator <- reactive({
+        list(
+          compound = input$perp_compound,
+          dose = input$perp_dose,
+          unit = input$perp_unit,
+          protocol = input$protocol,
+          duration = input$duration,
+          time = input$time
+        )
+      })
+      cli::cli_alert_info("Perpetrator updated with:")
+      cli::cli_li("Compound: {.field {input$perp_compound}}")
+      cli::cli_li("Dose: {.field {input$perp_dose}}")
+      cli::cli_li("Unit: {.field {input$perp_unit}}")
+      cli::cli_li("Protocol: {.field {input$protocol}}")
+      cli::cli_li("Duration: {.field {input$duration}}")
+      cli::cli_li("Time: {.field {input$time}}")
+
+
+    })
 
   })
 }

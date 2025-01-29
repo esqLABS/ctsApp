@@ -23,7 +23,7 @@ mod_results_plot_ui <- function(id) {
 #' results_plot Server Functions
 #'
 #' @noRd
-mod_results_plot_server <- function(id){
+mod_results_plot_server <- function(id, r){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
 

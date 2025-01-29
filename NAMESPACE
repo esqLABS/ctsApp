@@ -3,6 +3,7 @@
 export(run_app)
 import(bsicons)
 import(bslib)
+import(cli)
 import(purrr)
 import(shinipsum)
 import(shiny)

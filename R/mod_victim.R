@@ -12,7 +12,7 @@ mod_victim_ui <- function(id) {
   ns <- NS(id)
   tagList(
     selectInput(
-      ns("victim_compound"), "Compound",
+      ns("compound_victim"), "Compound",
       c("Levonorgestrel 1.5mg + EE", "Drospirenone 3mg + EE"),
       selected = "Drospirenone 3mg + EE"
     )
@@ -22,9 +22,15 @@ mod_victim_ui <- function(id) {
 #' victim Server Functions
 #'
 #' @noRd
-mod_victim_server <- function(id){
+mod_victim_server <- function(id, r){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
+
+    observeEvent(input$compound_victim, {
+      r$inputs$victim <- input$compound_victim
+      cli::cli_alert_info("Victim Compound Selected: {.field {r$inputs$victim}}")
+    }
+    )
 
   })
 }

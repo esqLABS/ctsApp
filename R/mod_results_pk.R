@@ -51,7 +51,7 @@ mod_results_pk_server <- function(id, r){
 
 
     mod_results_vbs_server("results_vbs_pk", vbs_data)
-    mod_results_plot_server("results_plot_pk")
+    mod_results_plot_server("results_plot_pk", r)
   })
 }
 

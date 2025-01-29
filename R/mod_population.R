@@ -13,17 +13,29 @@ mod_population_ui <- function(id) {
     selectInput(ns("population"), "Population",
                 choices = c("European", "Asian", "White American", "African American"),
                 selected = "European"),
-      shinyWidgets::numericRangeInput(ns("age"), "Age", value = c(20,35), min = 20, max = 35),
-      shinyWidgets::numericRangeInput(ns("bmi"), "BMI", value = c(18, 30), min = 16, max = 35)
+    shinyWidgets::numericRangeInput(ns("age"), "Age", value = c(20,35), min = 20, max = 35),
+    shinyWidgets::numericRangeInput(ns("bmi"), "BMI", value = c(18, 30), min = 16, max = 35)
   )
 }
 
 #' Population Server Functions
 #'
 #' @noRd
-mod_population_server <- function(id){
+mod_population_server <- function(id, r){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
+
+    observe({
+      r$inputs$population <- list(
+        population = input$population,
+        age = input$age,
+        bmi = input$bmi
+      )
+      cli::cli_alert_info("Population updated with:")
+      cli::cli_li("source pop: {.field {input$population}}")
+      cli::cli_li("age: {.field {input$age}}")
+      cli::cli_li("bmi: {.field {input$bmi}}")
+    })
 
   })
 }
