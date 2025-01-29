@@ -10,7 +10,13 @@
 mod_results_plot_ui <- function(id) {
   ns <- NS(id)
   card(
-    card_header("Time Profile")
+    card_header(class = "d-flex justify-content-between",
+                "Time Profile",
+                checkboxInput("obs_data", "Display Observed Data", TRUE, width = "auto")
+    ),
+    card_body(
+      plotOutput(ns("plot"))
+    )
   )
 }
 
@@ -20,6 +26,10 @@ mod_results_plot_ui <- function(id) {
 mod_results_plot_server <- function(id){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
+
+    output$plot <- renderPlot({
+      random_ggplot(type = "ribbon")
+    })
 
   })
 }

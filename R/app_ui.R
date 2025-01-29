@@ -9,9 +9,10 @@ app_ui <- function(request) {
     # Leave this function for adding external resources
     golem_add_external_resources(),
     # Your application UI logic
-    page_sidebar(
+    page_navbar(
       title = "Clinical Trial Simulator",
       sidebar = sidebar(
+        # title = "Clinical Trial Simulator",
         width = "30vw",
         accordion(
           open = TRUE,
@@ -21,8 +22,8 @@ app_ui <- function(request) {
             mod_victim_ui("victim_1")
           ),
           accordion_panel(
-            "Individual", icon = bs_icon("person-fill"),
-            mod_individual_ui("individual_1")
+            "Population", icon = bs_icon("people fill"),
+            mod_population_ui("individual_1")
           ),
           accordion_panel(
             "Perpetrator", icon = bs_icon("prescription"),
@@ -31,8 +32,22 @@ app_ui <- function(request) {
         ),
         input_task_button("run", "Run Simulation", icon = bs_icon("play"))
       ),
-      mod_results_values_ui("results_values_1"),
-      mod_results_plot_ui("results_plot_1"),
+      nav_panel(title = "PK",
+                mod_results_pk_ui("results_general_1")
+      ),
+      nav_panel(title = "DDI",
+                mod_mod_results_ddi_ui("mod_results_ddi_1")
+      ),
+      nav_panel(title = "PK PD"),
+      nav_spacer(),
+      nav_item(tags$a(bs_icon("file-text"), "White Paper", href = "")),
+      nav_panel(title = "About",
+                mod_about_ui("about_1")),
+      nav_menu("More",align = "right",
+               nav_item(tags$a(bs_icon("github"), "Code Repository", href = "")),
+               nav_item(tags$a(bs_icon("flag"), "Report an Issue", href = "")),
+               nav_item(tags$a(bs_icon("envelope-at"), "Contact", href = ""))
+      )
     )
   )
 }

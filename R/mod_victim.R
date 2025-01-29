@@ -13,26 +13,8 @@ mod_victim_ui <- function(id) {
   tagList(
     selectInput(
       ns("victim_compound"), "Compound",
-      c("Levonorgestrel", "Drospirenonne"),
-      selected = "Levonorgestrel"
-    ),
-    layout_column_wrap(
-      width = 1/2,
-      layout_column_wrap(
-        width = 1/2,
-        # style = css(grid_template_columns = "1fr 2fr"),
-        gap = "10px",
-        numericInput(ns("victim_dose"), "Dose", value = 1),
-        selectInput(ns("victim_unit"), "Unit", c("mg", "g"), selected = "mg")
-      ),
-      selectInput(ns("protocol"), "Protocol",
-                  c("Once", "Daily", "Twice Daily"),
-                  selected = "Daily"),
-    ),
-    layout_column_wrap(
-      width = 1/2,
-      numericInput(ns("duration"), "Duration (Days)", value = 30),
-      shinyWidgets::timeInput(ns("time"), "First Dose Time", value = "08:00")
+      c("Levonorgestrel 1.5mg + EE", "Drospirenone 3mg + EE"),
+      selected = "Drospirenone 3mg + EE"
     )
   )
 }

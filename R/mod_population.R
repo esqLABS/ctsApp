@@ -1,4 +1,4 @@
-#' individual UI Function
+#' Population UI Function
 #'
 #' @description A shiny Module.
 #'
@@ -7,24 +7,21 @@
 #' @noRd
 #'
 #' @importFrom shiny NS tagList
-mod_individual_ui <- function(id) {
+mod_population_ui <- function(id) {
   ns <- NS(id)
   tagList(
     selectInput(ns("population"), "Population",
                 choices = c("European", "Asian", "White American", "African American"),
                 selected = "European"),
-    layout_column_wrap(
-      width = 1/2,
-      numericInput(ns("age"), "Age", value = 30),
-      numericInput(ns("BMI"), "BMI", value = 25)
-    )
+      shinyWidgets::numericRangeInput(ns("age"), "Age", value = c(20,35), min = 20, max = 35),
+      shinyWidgets::numericRangeInput(ns("bmi"), "BMI", value = c(18, 30), min = 16, max = 35)
   )
 }
 
-#' individual Server Functions
+#' Population Server Functions
 #'
 #' @noRd
-mod_individual_server <- function(id){
+mod_population_server <- function(id){
   moduleServer(id, function(input, output, session){
     ns <- session$ns
 
@@ -32,7 +29,7 @@ mod_individual_server <- function(id){
 }
 
 ## To be copied in the UI
-# mod_individual_ui("individual_1")
+# mod_population_ui("individual_1")
 
 ## To be copied in the server
-# mod_individual_server("individual_1")
+# mod_population_server("individual_1")

@@ -18,13 +18,17 @@
 ## install.packages('attachment') # if needed.
 attachment::att_amend_desc()
 
-## Add modules ----
+`## Add modules ----
 ## Create a module infrastructure in R/
 golem::add_module(name = "victim", with_test = TRUE) # Name of the module
 golem::add_module(name = "individual", with_test = TRUE) # Name of the module
 golem::add_module(name = "perpetrator", with_test = TRUE) # Name of the module
 golem::add_module(name = "results_values", with_test = TRUE) # Name of the module
 golem::add_module(name = "results_plot", with_test = TRUE) # Name of the module
+golem::add_module(name = "results_general", with_test = TRUE) # Name of the module
+golem::add_module(name = "mod_results_ddi", with_test = TRUE) # Name of the module
+golem::add_module(name = "about", with_test = FALSE) # Name of the module
+
 
 ## Add helper functions ----
 ## Creates fct_* and utils_*

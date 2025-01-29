@@ -1,5 +1,5 @@
 testServer(
-  mod_population_server,
+  mod_results_pannels_server,
   # Add here your module params
   args = list()
   , {
@@ -27,10 +27,10 @@ testServer(
 })
  
 test_that("module ui works", {
-  ui <- mod_population_ui(id = "test")
+  ui <- mod_results_pannels_ui(id = "test")
   golem::expect_shinytaglist(ui)
   # Check that formals have not been removed
-  fmls <- formals(mod_population_ui)
+  fmls <- formals(mod_results_pannels_ui)
   for (i in c("id")){
     expect_true(i %in% names(fmls))
   }
