@@ -12,8 +12,13 @@ mod_perpetrator_ui <- function(id) {
   tagList(
     selectInput(
       ns("perpetrator_compound"), "Compound",
-      c("Rifampicin", "Midazolam"),
+      c("Rifampicin", "Midazolam", "Add Custom Compound"),
       selected = "Rifampicin"
+    ),
+    conditionalPanel(
+      ns = ns,
+      condition = "input.perpetrator_compound == 'Add Custom Compound'",
+      fileInput(ns("compound_file"), "Upload Compound File", accept = ".json", multiple = FALSE)
     ),
     tagList(
       layout_column_wrap(
