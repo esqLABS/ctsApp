@@ -25,7 +25,7 @@ app_server <- function(input, output, session) {
 
   # Results
   mod_results_pk_server("results_general_1", r)
-  mod_mod_results_ddi_server("mod_results_ddi_1", r)
+  mod_results_ddi_server("mod_results_ddi_1", r)
 
 
 

@@ -12,14 +12,18 @@ Imports:
     bsicons,
     bslib,
     config,
+    dplyr,
+    ggplot2,
     glue,
     golem,
+    lubridate,
     purrr,
     rlang,
     shinipsum,
     shiny,
     shinyWidgets,
-    stringr
+    stringr,
+    tidyr
 Suggests: 
     spelling,
     testthat (>= 3.0.0)

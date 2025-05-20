@@ -327,8 +327,13 @@ mod_formulation_server <- function(id, r) {
 
       if (input$formulation != "Create New Formulation") {
         # browser()
-        r[[id]] <- purrr::keep(r$default_snapshot$formulations, ~ .x$name == input$formulation)[[1]]
+        r[[id]] <- purrr::keep(
+          r$default_snapshot$formulations,
+          ~ .x$name == input$formulation
+        )[[1]]
       } else {
+        req(input$formulation_type)
+
         formulation_args <- list(
           name = paste0(
             "Custom Formulation ",
@@ -344,6 +349,12 @@ mod_formulation_server <- function(id, r) {
             )
           )
         } else if (input$formulation_type == "weibull") {
+          req(input$dissolution_time_weibull)
+          req(input$dissolution_time_unit_weibull)
+          req(input$lag_time_weibull)
+          req(input$lag_time_unit_weibull)
+          req(input$dissolution_shape)
+          req(input$suspension_weibull)
           formulation_args <- c(
             formulation_args,
             list(
@@ -357,6 +368,11 @@ mod_formulation_server <- function(id, r) {
             )
           )
         } else if (input$formulation_type == "lint80") {
+          req(input$dissolution_time_lint80)
+          req(input$dissolution_time_unit_lint80)
+          req(input$lag_time_lint80)
+          req(input$lag_time_unit_lint80)
+          req(input$suspension_lint80)
           formulation_args <- c(
             formulation_args,
             list(
@@ -369,6 +385,11 @@ mod_formulation_server <- function(id, r) {
             )
           )
         } else if (input$formulation_type == "particle") {
+          req(input$distribution_type)
+          req(input$thickness)
+          req(input$thickness_unit)
+          req(input$radius)
+          req(input$radius_unit)
           formulation_args <- c(
             formulation_args,
             list(
@@ -397,6 +418,9 @@ mod_formulation_server <- function(id, r) {
             )
           }
         } else if (input$formulation_type == "table") {
+          req(input$tableX)
+          req(input$tableY)
+          req(input$suspension_table)
           tableX <- as.numeric(unlist(strsplit(input$tableX, ",")))
           tableY <- as.numeric(unlist(strsplit(input$tableY, ",")))
 
@@ -410,6 +434,8 @@ mod_formulation_server <- function(id, r) {
             )
           )
         } else if (input$formulation_type == "zero") {
+          req(input$end_time)
+          req(input$end_time_unit)
           formulation_args <- c(
             formulation_args,
             list(
@@ -419,6 +445,8 @@ mod_formulation_server <- function(id, r) {
             )
           )
         } else if (input$formulation_type == "first") {
+          req(input$thalf)
+          req(input$thalf_unit)
           formulation_args <- c(
             formulation_args,
             list(

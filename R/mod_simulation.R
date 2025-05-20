@@ -39,7 +39,8 @@ mod_simulation_server <- function(id, r) {
       ddi$protocols <- c(r$protocol_victim, r$protocol_perpetrator)
 
       single_sim <-
-        cts::create_simulation("Single Simulation",
+        cts::create_simulation(
+          "Single Simulation",
           population = r$inputs$population,
           victim = r$inputs$victim
         ) |>
@@ -48,11 +49,15 @@ mod_simulation_server <- function(id, r) {
           protocol = r$protocol_victim$name,
           formulation = r$formulation_victim$name
         ) |>
-        cts::set_outputs(paths = glue::glue("Organism|PeripheralVenousBlood|{c(r$inputs$victim)}|Plasma (Peripheral Venous Blood)")) |>
+        cts::set_outputs(
+          paths = glue::glue(
+            "Organism|PeripheralVenousBlood|{c(r$inputs$victim)}|Plasma (Peripheral Venous Blood)"
+          )
+        ) |>
         cts::set_output_interval(
           start_time = 0,
           end_time = 1.1 * r$inputs$end_time,
-          resolution = 100/r$inputs$end_time,
+          resolution = 4,
           unit = "h"
         )
 
@@ -66,7 +71,8 @@ mod_simulation_server <- function(id, r) {
       )
 
       ddi_sim <-
-        cts::create_simulation("DDI Simulation",
+        cts::create_simulation(
+          "DDI Simulation",
           population = r$inputs$population,
           victim = r$inputs$victim,
           perpetrators = r$inputs$perpetrator
@@ -81,15 +87,20 @@ mod_simulation_server <- function(id, r) {
           protocol = r$protocol_perpetrator$name,
           formulation = r$formulation_perpetrator$name
         ) |>
-        cts::set_outputs(paths = glue::glue("Organism|PeripheralVenousBlood|{c(r$inputs$victim, r$inputs$perpetrator)}|Plasma (Peripheral Venous Blood)")) |>
+        cts::set_outputs(
+          paths = glue::glue(
+            "Organism|PeripheralVenousBlood|{c(r$inputs$victim, r$inputs$perpetrator)}|Plasma (Peripheral Venous Blood)"
+          )
+        ) |>
         cts::set_output_interval(
           start_time = 0,
           end_time = 1.1 * r$inputs$end_time,
-          resolution = 100/r$inputs$end_time,
+          resolution =  4,
           unit = "h"
         )
 
-      r$ddi <- cts::add_simulation(ddi,
+      r$ddi <- cts::add_simulation(
+        ddi,
         ddi_sim,
         options = list(
           add_interactions = TRUE,
@@ -99,7 +110,10 @@ mod_simulation_server <- function(id, r) {
 
       req(r$ddi)
 
-      r$results <- cts::run_ddi(r$ddi)
+      r$results$sim_results <- cts::run_ddi(r$ddi)
+
+      r$results$pk_results <- cts::run_pk_analysis(r$ddi)
+
     })
   })
 }

@@ -45,7 +45,7 @@ app_ui <- function(request) {
       ),
       nav_panel(
         title = "DDI",
-        mod_mod_results_ddi_ui("mod_results_ddi_1")
+        mod_results_ddi_ui("mod_results_ddi_1")
       ),
       nav_panel(title = "PK PD"),
       nav_spacer(),
