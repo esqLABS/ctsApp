@@ -9,34 +9,140 @@
 #' @importFrom shiny NS tagList
 mod_population_ui <- function(id) {
   ns <- NS(id)
+
   tagList(
-    selectInput(ns("population"), "Population",
-                choices = c("European", "Asian", "White American", "African American"),
-                selected = "European"),
-    shinyWidgets::numericRangeInput(ns("age"), "Age", value = c(20,35), min = 20, max = 35),
-    shinyWidgets::numericRangeInput(ns("bmi"), "BMI", value = c(18, 30), min = 16, max = 35)
+    layout_column_wrap(
+      width = NULL,
+      style = css(grid_template_columns = "2fr 1fr"),
+      selectInput(ns("population"), "Population", choices = NULL),
+      numericInput(ns("n"), "Indiv. Number", value = 10, min = 1, max = 100)
+    ),
+    shinyWidgets::numericRangeInput(
+      ns("age"),
+      "Age",
+      value = c(20, 60),
+      min = 0,
+      max = 100
+    ),
+    uiOutput(ns("physical_params"))
   )
 }
 
 #' Population Server Functions
 #'
 #' @noRd
-mod_population_server <- function(id, r){
-  moduleServer(id, function(input, output, session){
+mod_population_server <- function(id, r) {
+  moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    observe({
-      r$inputs$population <- list(
-        population = input$population,
-        age = input$age,
-        bmi = input$bmi
+    observeEvent(r$default_snapshot, {
+      req(r$default_snapshot)
+
+      updateSelectInput(
+        inputId = "population",
+        choices = r$default_snapshot$get_names("populations")
       )
+    })
+
+    output$physical_params <- renderUI({
+      req(input$population)
+
+      selected_data <- purrr::keep(
+        r$default_snapshot$populations,
+        ~ .x$Name == input$population
+      )[[1]]
+
+      # Check if population uses BMI or Height/Weight
+      if (!is.null(selected_data$Settings$BMI)) {
+        # BMI parameters
+        shinyWidgets::numericRangeInput(
+          ns("bmi"),
+          "BMI",
+          value = c(
+            selected_data$Settings$BMI$Min %||% 16,
+            selected_data$Settings$BMI$Max %||% 35
+          ),
+          min = 16,
+          max = 35
+        )
+      } else if (
+        !is.null(selected_data$Settings$Height) &&
+          !is.null(selected_data$Settings$Weight)
+      ) {
+        # Height and Weight parameters
+        tagList(
+          shinyWidgets::numericRangeInput(
+            ns("height"),
+            "Height (cm)",
+            value = c(
+              selected_data$Settings$Height$Min %||% 150,
+              selected_data$Settings$Height$Max %||% 190
+            ),
+            min = 120,
+            max = 220
+          ),
+          shinyWidgets::numericRangeInput(
+            ns("weight"),
+            "Weight (kg)",
+            value = c(
+              selected_data$Settings$Weight$Min %||% 50,
+              selected_data$Settings$Weight$Max %||% 100
+            ),
+            min = 30,
+            max = 150
+          )
+        )
+      } else {
+        # Fallback if neither is found
+        tags$div(
+          class = "alert alert-warning",
+          "No BMI or Height/Weight parameters found for this population"
+        )
+      }
+    })
+
+    observe({
+      req(input$population)
+
+      population_data <- purrr::keep(
+        r$default_snapshot$populations,
+        ~ .x$Name == input$population
+      )[[1]]
+
+      population_data$Settings$NumberOfIndividuals <- input$n
+
+      population_data$Settings$Age$Min <- input$age[1]
+      population_data$Settings$Age$Max <- input$age[2]
+
+      # Update either BMI or Height/Weight based on what's available
+      if (!is.null(input$bmi)) {
+        population_data$Settings$BMI$Min <- input$bmi[1]
+        population_data$Settings$BMI$Max <- input$bmi[2]
+
+        info_text <- "bmi: {.field {input$bmi}}"
+      } else if (!is.null(input$height) && !is.null(input$weight)) {
+        population_data$Settings$Height$Min <- input$height[1]
+        population_data$Settings$Height$Max <- input$height[2]
+        population_data$Settings$Weight$Min <- input$weight[1]
+        population_data$Settings$Weight$Max <- input$weight[2]
+
+        info_text <-
+          c(
+            "Height: {.field {input$height}}",
+            "Weight: {.field {input$weight}}"
+          )
+      } else {
+        info_text <- "no physical parameters"
+      }
+
+      r$inputs$population <- input$population
+      r$population_data <- population_data
+
       cli::cli_alert_info("Population updated with:")
       cli::cli_li("source pop: {.field {input$population}}")
       cli::cli_li("age: {.field {input$age}}")
-      cli::cli_li("bmi: {.field {input$bmi}}")
+      cli::cli_li(info_text)
     })
-
   })
 }
 

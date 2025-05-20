@@ -12,11 +12,14 @@ Imports:
     bsicons,
     bslib,
     config,
+    glue,
     golem,
     purrr,
+    rlang,
     shinipsum,
     shiny,
-    shinyWidgets
+    shinyWidgets,
+    stringr
 Suggests: 
     spelling,
     testthat (>= 3.0.0)

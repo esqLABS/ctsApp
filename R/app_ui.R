@@ -13,40 +13,52 @@ app_ui <- function(request) {
       title = "Clinical Trial Simulator",
       sidebar = sidebar(
         # title = "Clinical Trial Simulator",
-        width = "30vw",
+        width = "25vw",
         accordion(
           open = TRUE,
-          style = "min-height: 70vh; max-height: 70vh; overflow-y: auto;",
+          style = "min-height: 75vh; max-height: 75vh; overflow-y: auto;",
           accordion_panel(
-            "Victim",icon = bs_icon("capsule"),
-            mod_victim_ui("victim_1")
+            "Victim",
+            icon = bs_icon("capsule"),
+            mod_compound_ui("victim"),
+            mod_protocol_ui("protocol_victim"),
+            mod_formulation_ui("formulation_victim")
           ),
           accordion_panel(
-            "Population", icon = bs_icon("people fill"),
+            "Population",
+            icon = bs_icon("people fill"),
             mod_population_ui("individual_1")
           ),
           accordion_panel(
-            "Perpetrator", icon = bs_icon("prescription"),
-            mod_perpetrator_ui("perpetrator_1")
+            "Perpetrator",
+            icon = bs_icon("prescription"),
+            mod_compound_ui("perpetrator"),
+            mod_protocol_ui("protocol_perpetrator"),
+            mod_formulation_ui("formulation_perpetrator")
           )
         ),
-        input_task_button("run", "Run Simulation", icon = bs_icon("play"))
+        mod_simulation_ui("simulation_1")
       ),
-      nav_panel(title = "PK",
-                mod_results_pk_ui("results_general_1")
+      nav_panel(
+        title = "PK",
+        mod_results_pk_ui("results_general_1")
       ),
-      nav_panel(title = "DDI",
-                mod_mod_results_ddi_ui("mod_results_ddi_1")
+      nav_panel(
+        title = "DDI",
+        mod_mod_results_ddi_ui("mod_results_ddi_1")
       ),
       nav_panel(title = "PK PD"),
       nav_spacer(),
       nav_item(tags$a(bs_icon("file-text"), "White Paper", href = "")),
-      nav_panel(title = "About",
-                mod_about_ui("about_1")),
-      nav_menu("More",align = "right",
-               nav_item(tags$a(bs_icon("github"), "Code Repository", href = "")),
-               nav_item(tags$a(bs_icon("flag"), "Report an Issue", href = "")),
-               nav_item(tags$a(bs_icon("envelope-at"), "Contact", href = ""))
+      nav_panel(
+        title = "About",
+        mod_about_ui("about_1")
+      ),
+      nav_menu("More",
+        align = "right",
+        nav_item(tags$a(bs_icon("github"), "Code Repository", href = "")),
+        nav_item(tags$a(bs_icon("flag"), "Report an Issue", href = "")),
+        nav_item(tags$a(bs_icon("envelope-at"), "Contact", href = ""))
       )
     )
   )
