@@ -19,7 +19,7 @@ mod_results_ddi_ui <- function(id) {
         "DDI Comparison"
       ),
       card_body(
-        plotOutput(ns("plot"))
+        plotlyOutput(ns("plot"))
       )
     )
   )
@@ -28,6 +28,8 @@ mod_results_ddi_ui <- function(id) {
 #' mod_results_ddi Server Functions
 #'
 #' @noRd
+#' @importFrom ggplot2 ggplot aes labs guides geom_line geom_ribbon
+#' @importFrom plotly plotlyOutput renderPlotly ggplotly layout config
 mod_results_ddi_server <- function(id, r) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -38,7 +40,7 @@ mod_results_ddi_server <- function(id, r) {
     })
     outputOptions(output, "has_results", suspendWhenHidden = FALSE)
 
-    output$plot <- renderPlot({
+    output$plot <- renderPlotly({
       req(r$results)
 
       plot_data <-
@@ -68,22 +70,78 @@ mod_results_ddi_server <- function(id, r) {
           sim = sim
         )
 
-      ggplot(plot_data, aes(x = time, y = concentration)) +
-        stat_summary(aes(color = sim), geom = "line", fun = "mean") +
-        stat_summary(
-          aes(fill = sim),
-          geom = "ribbon",
-          fun.max = "max",
-          fun.min = "min",
+      # Calculate summary statistics for each time point and simulation
+      summary_data <- plot_data |>
+        dplyr::group_by(time, sim) |>
+        dplyr::summarise(
+          mean_conc = mean(concentration),
+          min_conc = min(concentration),
+          max_conc = max(concentration),
+          .groups = "drop"
+        )
+
+      # Create a column with the hover text
+      summary_data$hovertext <- paste0(
+        "<b>",
+        summary_data$sim,
+        "</b><br>",
+        "Time: ",
+        round(summary_data$time, 2),
+        " h<br>",
+        "Mean: ",
+        round(summary_data$mean_conc, 2),
+        " µg/L<br>",
+        "Range: [",
+        round(summary_data$min_conc, 2),
+        " - ",
+        round(summary_data$max_conc, 2),
+        "] µg/L"
+      )
+
+      p <- ggplot2::ggplot(
+        summary_data,
+        aes(x = time, y = mean_conc, group = sim)
+      ) +
+        ggplot2::geom_line(aes(color = sim, text = hovertext)) +
+        ggplot2::geom_ribbon(
+          aes(ymin = min_conc, ymax = max_conc, fill = sim, text = hovertext),
           alpha = 0.6
         ) +
-        labs(
+        ggplot2::labs(
           title = glue::glue("Concentration Time Profile of {r$inputs$victim}"),
           fill = NULL,
           y = "Concentration [µg/L]",
           x = "Time [h]"
         ) +
-        guides(color = FALSE)
+        ggplot2::guides(color = FALSE)
+
+      # Create plotly object with tooltip using the text aesthetic
+      plotly::ggplotly(p, tooltip = "text") |>
+        plotly::layout(
+          hovermode = "closest",
+          legend = list(
+            orientation = "h", # horizontal legend
+            xanchor = "center", # use center of legend as anchor
+            x = 0.5, # position at center of x-axis
+            y = -0.15, # position below the plot
+            yanchor = "top" # use top of legend as anchor
+          )
+        ) |>
+        plotly::config(
+          modeBarButtonsToRemove = c(
+            "pan2d",
+            "select2d",
+            "lasso2d",
+            "hoverClosestCartesian",
+            "hoverCompareCartesian",
+            "toggleSpikelines",
+            "resetScale2d",
+            "zoomIn2d",
+            "zoomOut2d",
+            "resetViewMapbox"
+          ),
+          displaylogo = FALSE
+        )
     })
 
     output$value_boxes <- renderUI({

@@ -30,4 +30,15 @@ app_server <- function(input, output, session) {
 
   # Results
   mod_results_server("results_1", r)
+
+
+  observeEvent(r$results, {
+    req(r$results)
+
+    bslib::update_tooltip(id = "results-tooltip",
+                          "Results available !")
+
+    bslib::toggle_tooltip(id = "results-tooltip",
+                          show = TRUE)
+  })
 }

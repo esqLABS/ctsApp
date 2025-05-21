@@ -30,6 +30,8 @@ mod_simulation_server <- function(id, r) {
       req(r$protocol_victim)
       req(r$protocol_perpetrator)
 
+      r$inputs$run_btn <- input$run
+
       ddi <- cts::create_ddi(cts::compound(r$default_snapshot$source))
 
       ddi$remove_formulation(ddi$get_names("formulations"))

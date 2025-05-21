@@ -102,8 +102,8 @@ mod_simulation_params_server <- function(id, r) {
                 suggested_end_time <- suggested_end_time * 60
             }
 
-            # Round the suggested end time to make it cleaner
-            suggested_end_time <- round(suggested_end_time, 1)
+            # Round the suggested end time to make it cleaner to the closest integer
+            suggested_end_time <- ceiling(suggested_end_time)
 
             # Update the UI
             updateNumericInput(

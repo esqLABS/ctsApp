@@ -49,8 +49,15 @@ app_ui <- function(request) {
         icon = bs_icon("card-list"),
         mod_summary_ui("summary_1")
       ),
+
       nav_panel(
-        title = "Results",
+        title = tooltip(
+          trigger = "Results",
+          id = "results-tooltip",
+          placement = "bottom",
+          show = FALSE,
+          ""
+        ),
         icon = bs_icon("stars"),
         mod_results_ui("results_1")
       ),
