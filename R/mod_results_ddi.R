@@ -11,30 +11,15 @@ mod_results_ddi_ui <- function(id) {
   ns <- NS(id)
 
   tagList(
+    uiOutput(ns("value_boxes")),
     card(
+      fill = TRUE,
+      card_header(
+        class = "d-flex justify-content-between",
+        "DDI Comparison"
+      ),
       card_body(
-        uiOutput(ns("value_boxes")),
-        card(
-          card_header(
-            class = "d-flex justify-content-between",
-            "Time Profile",
-            # checkboxInput(ns("show_obs"), "Display Observed Data", TRUE, width = "auto"),
-            # checkboxInput(ns("show_perpetrator"), "Display Perpetrator", FALSE, width = "auto")
-          ),
-          card_body(
-            conditionalPanel(
-              condition = paste0("!output['", ns("has_results"), "']"),
-              div(
-                style = "text-align: center; padding: 2em;",
-                "Please run the simulation to view results."
-              )
-            ),
-            conditionalPanel(
-              condition = paste0("output['", ns("has_results"), "']"),
-              plotOutput(ns("plot"))
-            )
-          )
-        )
+        plotOutput(ns("plot"))
       )
     )
   )

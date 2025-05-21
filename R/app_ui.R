@@ -35,6 +35,11 @@ app_ui <- function(request) {
             mod_compound_ui("perpetrator"),
             mod_protocol_ui("protocol_perpetrator"),
             mod_formulation_ui("formulation_perpetrator")
+          ),
+          accordion_panel(
+            "Simulation Parameters",
+            icon = bs_icon("sliders"),
+            mod_simulation_params_ui("simulation_params")
           )
         ),
         mod_simulation_ui("simulation_1")
@@ -45,14 +50,10 @@ app_ui <- function(request) {
         mod_summary_ui("summary_1")
       ),
       nav_panel(
-        title = "PK",
-        mod_results_pk_ui("results_general_1")
+        title = "Results",
+        icon = bs_icon("stars"),
+        mod_results_ui("results_1")
       ),
-      nav_panel(
-        title = "DDI",
-        mod_results_ddi_ui("mod_results_ddi_1")
-      ),
-      nav_panel(title = "PK PD"),
       nav_spacer(),
       nav_item(tags$a(bs_icon("file-text"), "White Paper", href = "")),
       nav_panel(

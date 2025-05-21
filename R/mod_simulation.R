@@ -38,7 +38,6 @@ mod_simulation_server <- function(id, r) {
       ddi$formulations <- c(r$formulation_victim, r$formulation_perpetrator)
       ddi$protocols <- c(r$protocol_victim, r$protocol_perpetrator)
 
-
       single_sim <-
         cts::create_simulation(
           "Single Simulation",
@@ -57,9 +56,9 @@ mod_simulation_server <- function(id, r) {
         ) |>
         cts::set_output_interval(
           start_time = 0,
-          end_time = 1.1 * r$inputs$end_time,
-          resolution = 4,
-          unit = "h"
+          end_time = r$simulation_params$duration_value,
+          resolution = r$simulation_params$resolution,
+          unit = r$simulation_params$duration_unit
         )
 
       cts::add_simulation(
@@ -95,9 +94,9 @@ mod_simulation_server <- function(id, r) {
         ) |>
         cts::set_output_interval(
           start_time = 0,
-          end_time = 1.1 * r$inputs$end_time,
-          resolution =  4,
-          unit = "h"
+          end_time = r$simulation_params$duration_value,
+          resolution = r$simulation_params$resolution,
+          unit = r$simulation_params$duration_unit
         )
 
       r$ddi <- cts::add_simulation(
@@ -114,7 +113,6 @@ mod_simulation_server <- function(id, r) {
       r$results$sim_results <- cts::run_ddi(r$ddi)
 
       r$results$pk_results <- cts::run_pk_analysis(r$ddi)
-
     })
   })
 }

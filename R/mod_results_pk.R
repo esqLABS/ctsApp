@@ -10,35 +10,21 @@
 mod_results_pk_ui <- function(id) {
   ns <- NS(id)
   tagList(
+    uiOutput(ns("value_boxes")),
     card(
-      card_body(
-        uiOutput(ns("value_boxes")),
-        card(
-          card_header(
-            class = "d-flex justify-content-between",
-            "Time Profile",
-            # checkboxInput(ns("show_obs"), "Display Observed Data", TRUE, width = "auto"),
-            checkboxInput(
-              ns("show_perpetrator"),
-              "Display Perpetrator",
-              FALSE,
-              width = "auto"
-            )
-          ),
-          card_body(
-            conditionalPanel(
-              condition = paste0("!output['", ns("has_results"), "']"),
-              div(
-                style = "text-align: center; padding: 2em;",
-                "Please run the simulation to view results."
-              )
-            ),
-            conditionalPanel(
-              condition = paste0("output['", ns("has_results"), "']"),
-              plotOutput(ns("plot"))
-            )
-          )
+      fill = TRUE,
+      card_header(
+        class = "d-flex justify-content-between",
+        "Time Profile",
+        checkboxInput(
+          ns("show_perpetrator"),
+          "Display Perpetrator",
+          FALSE,
+          width = "auto"
         )
+      ),
+      card_body(
+        plotOutput(ns("plot"))
       )
     )
   )
@@ -51,12 +37,6 @@ mod_results_pk_ui <- function(id) {
 mod_results_pk_server <- function(id, r) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
-
-    # Add an output to track if results are available
-    output$has_results <- reactive({
-      !is.null(r$results)
-    })
-    outputOptions(output, "has_results", suspendWhenHidden = FALSE)
 
     output$plot <- renderPlot({
       req(r$results)

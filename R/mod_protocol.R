@@ -131,14 +131,20 @@ mod_protocol_server <- function(id, r) {
 
       r$inputs[[id]] <- input$protocol
 
-      r$inputs$end_time <- input$duration * 24 # transforms days in hours
-
       if (input$protocol != "Create New Protocol") {
-        # browser()
+
         r[[id]] <- purrr::keep(
           r$default_snapshot$protocols,
           ~ .x$name == input$protocol
         )[[1]]
+
+        end_time <- r[[id]]$end_time
+        end_time_unit <- r[[id]]$end_time_unit
+
+        if(!is.null(end_time)){
+          r$inputs[[paste0(id, "_end_time")]] <- lubridate::duration(end_time, osp_to_lubridate(end_time_unit)) / lubridate::duration(1, "hours")
+          #TODO support advanced protocol to define end_time
+        }
       } else {
         req(input$dose)
         req(input$dose_unit)
@@ -156,6 +162,8 @@ mod_protocol_server <- function(id, r) {
             "infusion_time_unit" = input$infusion_time_unit
           )
         }
+
+        r$inputs[[paste0(id, "_end_time")]] <- input$duration * 24 # transforms days in hours
 
         r[[id]] <- rlang::inject(
           cts::create_protocol(
@@ -179,3 +187,13 @@ mod_protocol_server <- function(id, r) {
 
 ## To be copied in the server
 # mod_protocol_server("protocol_1")
+
+osp_to_lubridate <- function(time_unit){
+  dplyr::case_match(time_unit,
+                    "s" ~ "seconds",
+                    "min" ~ "minutes",
+                    "h" ~ "hours",
+                    "day(s)" ~ "days",
+                    "week(s)" ~ "weeks",
+                    "year(s)" ~ "years")
+}
