@@ -38,6 +38,7 @@ mod_simulation_server <- function(id, r) {
       ddi$formulations <- c(r$formulation_victim, r$formulation_perpetrator)
       ddi$protocols <- c(r$protocol_victim, r$protocol_perpetrator)
 
+
       single_sim <-
         cts::create_simulation(
           "Single Simulation",

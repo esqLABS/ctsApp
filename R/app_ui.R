@@ -40,6 +40,11 @@ app_ui <- function(request) {
         mod_simulation_ui("simulation_1")
       ),
       nav_panel(
+        title = "Summary",
+        icon = bs_icon("card-list"),
+        mod_summary_ui("summary_1")
+      ),
+      nav_panel(
         title = "PK",
         mod_results_pk_ui("results_general_1")
       ),
@@ -54,7 +59,8 @@ app_ui <- function(request) {
         title = "About",
         mod_about_ui("about_1")
       ),
-      nav_menu("More",
+      nav_menu(
+        "More",
         align = "right",
         nav_item(tags$a(bs_icon("github"), "Code Repository", href = "")),
         nav_item(tags$a(bs_icon("flag"), "Report an Issue", href = "")),

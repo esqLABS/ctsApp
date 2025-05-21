@@ -18,10 +18,25 @@ mod_results_pk_ui <- function(id) {
             class = "d-flex justify-content-between",
             "Time Profile",
             # checkboxInput(ns("show_obs"), "Display Observed Data", TRUE, width = "auto"),
-            checkboxInput(ns("show_perpetrator"), "Display Perpetrator", FALSE, width = "auto")
+            checkboxInput(
+              ns("show_perpetrator"),
+              "Display Perpetrator",
+              FALSE,
+              width = "auto"
+            )
           ),
           card_body(
-            plotOutput(ns("plot"))
+            conditionalPanel(
+              condition = paste0("!output['", ns("has_results"), "']"),
+              div(
+                style = "text-align: center; padding: 2em;",
+                "Please run the simulation to view results."
+              )
+            ),
+            conditionalPanel(
+              condition = paste0("output['", ns("has_results"), "']"),
+              plotOutput(ns("plot"))
+            )
           )
         )
       )
@@ -37,31 +52,47 @@ mod_results_pk_server <- function(id, r) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
+    # Add an output to track if results are available
+    output$has_results <- reactive({
+      !is.null(r$results)
+    })
+    outputOptions(output, "has_results", suspendWhenHidden = FALSE)
+
     output$plot <- renderPlot({
       req(r$results)
 
       plot_data <-
         r$results$sim_results$`DDI Simulation` |>
-        dplyr::filter(stringr::str_detect(paths, "Plasma \\(Peripheral Venous Blood\\)")) |>
+        dplyr::filter(stringr::str_detect(
+          paths,
+          "Plasma \\(Peripheral Venous Blood\\)"
+        )) |>
         dplyr::transmute(
           individual = IndividualId,
-          time = lubridate::duration(Time, "minutes") / lubridate::duration(1, "hours"), # Time in hours
-          molecule = stringr::str_extract(paths, pattern = "(?<=VenousBlood\\|)[^\\|]*"),
+          time = lubridate::duration(Time, "minutes") /
+            lubridate::duration(1, "hours"), # Time in hours
+          molecule = stringr::str_extract(
+            paths,
+            pattern = "(?<=VenousBlood\\|)[^\\|]*"
+          ),
           concentration = simulationValues * molWeight # concentration in µg/L
         )
 
       if (!input$show_perpetrator) {
         plot_data <- dplyr::filter(
           plot_data,
-          stringr::str_detect(molecule,
-            r$inputs$perpetrator,
-            negate = TRUE
-          )
+          stringr::str_detect(molecule, r$inputs$perpetrator, negate = TRUE)
         )
       }
       ggplot(plot_data, aes(x = time, y = concentration)) +
         stat_summary(aes(color = molecule), geom = "line", fun = "mean") +
-        stat_summary(aes(fill = molecule), geom = "ribbon", fun.max = "max", fun.min = "min", alpha = 0.6) +
+        stat_summary(
+          aes(fill = molecule),
+          geom = "ribbon",
+          fun.max = "max",
+          fun.min = "min",
+          alpha = 0.6
+        ) +
         labs(
           title = "Concentration Time Profile",
           fill = "Compounds",
@@ -70,7 +101,6 @@ mod_results_pk_server <- function(id, r) {
         ) +
         guides(color = FALSE)
     })
-
 
     output$value_boxes <- renderUI({
       req(r$results)
@@ -97,11 +127,15 @@ mod_results_pk_server <- function(id, r) {
         dplyr::pull(r$inputs$victim) |>
         unlist()
 
-      victim_cmax <- signif(quantile(victim_cmax * victim_molw, probs = c(0.05, .5, 0.95)), 4) # µmol/L -> µg/L
+      victim_cmax <- signif(
+        quantile(victim_cmax * victim_molw, probs = c(0.05, .5, 0.95)),
+        4
+      ) # µmol/L -> µg/L
       victim_tmax <- signif(quantile(victim_tmax, probs = c(0.05, .5, 0.95)), 4) # hours
-      victim_auc <- signif(quantile(victim_auc * victim_molw / 60, probs = c(0.05, .5, 0.95)), 4) # µmol*min/L -> µg*h/L
-
-
+      victim_auc <- signif(
+        quantile(victim_auc * victim_molw / 60, probs = c(0.05, .5, 0.95)),
+        4
+      ) # µmol*min/L -> µg*h/L
 
       layout_column_wrap(
         1 / 3,
@@ -118,7 +152,6 @@ mod_results_pk_server <- function(id, r) {
 
 ## To be copied in the server
 # mod_results_pk_server("results_general_1")
-
 
 quantile_value_box <- function(title, quantiles, icon = NULL) {
   bslib::value_box(

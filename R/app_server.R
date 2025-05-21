@@ -19,14 +19,13 @@ app_server <- function(input, output, session) {
   mod_formulation_server("formulation_victim", r)
   mod_formulation_server("formulation_perpetrator", r)
 
-
   # Simulation
   mod_simulation_server("simulation_1", r)
+
+  # Summary
+  mod_summary_server("summary_1", r)
 
   # Results
   mod_results_pk_server("results_general_1", r)
   mod_results_ddi_server("mod_results_ddi_1", r)
-
-
-
 }
