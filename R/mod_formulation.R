@@ -321,14 +321,23 @@ mod_formulation_server <- function(id, r) {
     ns <- session$ns
 
     observeEvent(r$default_snapshot, {
-      req(r$default_snapshot)
+    req(r$default_snapshot)
+      
+      all_formulation_names <- r$default_snapshot$get_names("formulations")
+
+      selected_formulation <- if (grepl("victim", id)) {
+        "DRSP oral tablet"
+      } else {
+        "ITZ oral tablet"
+      }
 
       updateSelectInput(
         inputId = "formulation",
         choices = c(
-          r$default_snapshot$get_names("formulations"),
+          all_formulation_names,
           "Create New Formulation"
         ),
+        selected = selected_formulation
       )
     })
 

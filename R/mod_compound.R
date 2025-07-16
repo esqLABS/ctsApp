@@ -29,7 +29,7 @@ mod_compound_server <- function(id, r) {
     model_directory <- system.file("data/models", package = "ctsApp")
 
     observe({
-      r$default_snapshot <- cts:::Snapshot$new(file.path(model_directory, "Drospirenone_v12.json"))
+      r$default_snapshot <- cts:::Snapshot$new(file.path(model_directory, "ddi_oral_contraceptives.json"))
     })
 
     observeEvent(r$default_snapshot, {
@@ -44,7 +44,7 @@ mod_compound_server <- function(id, r) {
         compound_names <- stringr::str_subset(compound_names, pattern = "Drospirenone|Levonorgestrel", negate = TRUE)
         updateSelectInput(inputId = "compound",
                           choices = compound_names,
-                          selected = "Ketoconazole")
+                          selected = "Itraconazole")
       }
     })
 
