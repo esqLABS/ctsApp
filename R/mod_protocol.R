@@ -111,18 +111,22 @@ mod_protocol_server <- function(id, r) {
 
     observeEvent(r$default_snapshot, {
       req(r$default_snapshot)
-      if (grepl("victim", id)) {
-        selected <- "IV DRSP 0.5 mg of DRSP"
+
+      all_protocol_names <- r$default_snapshot$get_names("protocols")
+
+      selected_protocol <- if (grepl("victim", id)) {
+        "DRSP_3mg 21 days"
       } else {
-        selected <- "Ketoconazole 200 mg BID"
+        "ITZ 100mg 10 days"
       }
+
       updateSelectInput(
         inputId = "protocol",
         choices = c(
-          r$default_snapshot$get_names("protocols"),
+          all_protocol_names,
           "Create New Protocol"
         ),
-        selected = selected
+        selected = selected_protocol
       )
     })
 

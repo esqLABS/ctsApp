@@ -40,7 +40,8 @@ mod_population_server <- function(id, r) {
 
       updateSelectInput(
         inputId = "population",
-        choices = r$default_snapshot$get_names("populations")
+        choices = r$default_snapshot$get_names("populations"),
+        selected = "Healthy Women"
       )
     })
 

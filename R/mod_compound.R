@@ -44,7 +44,7 @@ mod_compound_server <- function(id, r) {
         compound_names <- stringr::str_subset(compound_names, pattern = "Drospirenone|Levonorgestrel", negate = TRUE)
         updateSelectInput(inputId = "compound",
                           choices = compound_names,
-                          selected = "Ketoconazole")
+                          selected = "Itraconazole")
       }
     })
 
