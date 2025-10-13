@@ -45,8 +45,8 @@ app_ui <- function(request) {
         mod_simulation_ui("simulation_1")
       ),
       nav_panel(
-        title = "Summary",
-        icon = bs_icon("card-list"),
+        title = "Experiment Design",
+        icon = icon("flask"),
         mod_summary_ui("summary_1")
       ),
 
@@ -58,7 +58,7 @@ app_ui <- function(request) {
           show = FALSE,
           ""
         ),
-        icon = bs_icon("stars"),
+        icon = icon("clipboard-check"),
         mod_results_ui("results_1")
       ),
       nav_spacer(),

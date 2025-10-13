@@ -321,8 +321,8 @@ mod_formulation_server <- function(id, r) {
     ns <- session$ns
 
     observeEvent(r$default_snapshot, {
-    req(r$default_snapshot)
-      
+      req(r$default_snapshot)
+
       all_formulation_names <- r$default_snapshot$get_names("formulations")
 
       selected_formulation <- if (grepl("victim", id)) {
@@ -346,7 +346,6 @@ mod_formulation_server <- function(id, r) {
       r$inputs[[id]] <- input$formulation
 
       if (input$formulation != "Create New Formulation") {
-        # browser()
         r[[id]] <- purrr::keep(
           r$default_snapshot$formulations,
           ~ .x$name == input$formulation

@@ -111,6 +111,7 @@ mod_population_server <- function(id, r) {
       )[[1]]
 
       population_data$Settings$NumberOfIndividuals <- input$n
+      population_data$Seed <- 42
 
       population_data$Settings$Age$Min <- input$age[1]
       population_data$Settings$Age$Max <- input$age[2]
@@ -121,6 +122,18 @@ mod_population_server <- function(id, r) {
         population_data$Settings$BMI$Max <- input$bmi[2]
 
         info_text <- "bmi: {.field {input$bmi}}"
+
+        r$population_characteristics <- ospsuite::createPopulationCharacteristics(
+          species = population_data$Settings$Individual$OriginData$Species,
+          population = population_data$Settings$Individual$OriginData$Population,
+          numberOfIndividuals = input$n,
+          proportionOfFemales = 1,
+          BMIMin = population_data$Settings$BMI$Min,
+          BMIMax = population_data$Settings$BMI$Max,
+          ageMin = population_data$Settings$Age$Min,
+          ageMax = population_data$Settings$Age$Max,
+          seed = 42
+        )
       } else if (!is.null(input$height) && !is.null(input$weight)) {
         population_data$Settings$Height$Min <- input$height[1]
         population_data$Settings$Height$Max <- input$height[2]
@@ -132,6 +145,22 @@ mod_population_server <- function(id, r) {
             "Height: {.field {input$height}}",
             "Weight: {.field {input$weight}}"
           )
+
+        r$population_characteristics <- ospsuite::createPopulationCharacteristics(
+          species = population_data$Settings$Individual$OriginData$Species,
+          population = population_data$Settings$Individual$OriginData$Population,
+          numberOfIndividuals = input$n,
+          proportionOfFemales = 1,
+          weightMin = population_data$Settings$Weight$Min,
+          weightMax = population_data$Settings$Weight$Max,
+          weightUnit = population_data$Settings$Weight$Unit,
+          heightMin = population_data$Settings$Height$Min,
+          heightMax = population_data$Settings$Height$Max,
+          heightUnit = population_data$Settings$Height$Unit,
+          ageMin = population_data$Settings$Age$Min,
+          ageMax = population_data$Settings$Age$Max,
+          seed = 42
+        )
       } else {
         info_text <- "no physical parameters"
       }
@@ -144,6 +173,25 @@ mod_population_server <- function(id, r) {
       cli::cli_li("age: {.field {input$age}}")
       cli::cli_li(info_text)
     })
+  })
+
+  observe({
+    req(r$population_characteristics)
+    generated_pop <- ospsuite::createPopulation(
+      r$population_characteristics
+    )
+    r$demographics <- tibble::tibble(
+      id = generated_pop$population$allIndividualIds,
+      age = generated_pop$population$getParameterValues("Organism|Age"),
+      weight = generated_pop$population$getParameterValues("Organism|Weight"),
+      height = ospsuite::toUnit(
+        ospsuite::ospDimensions$Length,
+        generated_pop$population$getParameterValues("Organism|Height"),
+        targetUnit = ospsuite::ospUnits$Length$cm
+      )
+    )
+
+    cli::cli_inform("Population generated.")
   })
 }
 
