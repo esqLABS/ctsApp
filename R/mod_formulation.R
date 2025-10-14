@@ -351,6 +351,10 @@ mod_formulation_server <- function(id, r) {
           ~ .x$name == input$formulation
         )[[1]]
       } else {
+        # Clear the formulation object when "Create New Formulation" is selected
+        # This ensures buttons are disabled until all custom inputs are ready
+        r[[id]] <- NULL
+        
         req(input$formulation_type)
 
         formulation_args <- list(

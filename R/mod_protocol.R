@@ -180,6 +180,10 @@ mod_protocol_server <- function(id, r) {
           #TODO support advanced protocol to define end_time
         }
       } else {
+        # Clear the protocol object when "Create New Protocol" is selected
+        # This ensures buttons are disabled until all custom inputs are ready
+        r[[id]] <- NULL
+        
         req(input$dose)
         req(input$dose_unit)
         req(input$protocol_type)

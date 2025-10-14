@@ -164,12 +164,14 @@ mod_simulation_server <- function(id, r) {
       })
     })
 
-    # Enable/disable export button based on input availability
+    # Enable/disable buttons based on input availability
     observe({
       if (inputs_ready()) {
         shinyjs::enable("export")
+        shinyjs::enable("run")
       } else {
         shinyjs::disable("export")
+        shinyjs::disable("run")
       }
     })
 
