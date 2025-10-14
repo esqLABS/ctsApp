@@ -104,6 +104,18 @@ mod_population_server <- function(id, r) {
 
     observe({
       req(input$population)
+      req(input$age)
+      req(input$n)
+      
+      # Clear population characteristics if validation will fail
+      # This ensures export button gets disabled when inputs become invalid
+      if (length(input$age) != 2 || 
+          is.na(input$age[1]) || is.na(input$age[2]) ||
+          input$age[1] >= input$age[2] ||
+          input$age[1] < 0 || input$age[2] > 100) {
+        r$population_characteristics <- NULL
+        return()
+      }
 
       population_data <- purrr::keep(
         r$default_snapshot$populations,
@@ -117,7 +129,16 @@ mod_population_server <- function(id, r) {
       population_data$Settings$Age$Max <- input$age[2]
 
       # Update either BMI or Height/Weight based on what's available
-      if (!is.null(input$bmi)) {
+      if (!is.null(input$bmi) && length(input$bmi) == 2) {
+        # Validate BMI range - clear characteristics if invalid
+        if (is.na(input$bmi[1]) || is.na(input$bmi[2]) ||
+            input$bmi[1] >= input$bmi[2] ||
+            input$bmi[1] < 4 || input$bmi[1] > 150 ||
+            input$bmi[2] < 4 || input$bmi[2] > 150) {
+          r$population_characteristics <- NULL
+          return()
+        }
+        
         population_data$Settings$BMI$Min <- input$bmi[1]
         population_data$Settings$BMI$Max <- input$bmi[2]
 
@@ -134,7 +155,17 @@ mod_population_server <- function(id, r) {
           ageMax = population_data$Settings$Age$Max,
           seed = 42
         )
-      } else if (!is.null(input$height) && !is.null(input$weight)) {
+      } else if (!is.null(input$height) && !is.null(input$weight) && 
+                 length(input$height) == 2 && length(input$weight) == 2) {
+        # Validate height and weight ranges - clear characteristics if invalid
+        if (is.na(input$height[1]) || is.na(input$height[2]) ||
+            is.na(input$weight[1]) || is.na(input$weight[2]) ||
+            input$height[1] >= input$height[2] ||
+            input$weight[1] >= input$weight[2]) {
+          r$population_characteristics <- NULL
+          return()
+        }
+        
         population_data$Settings$Height$Min <- input$height[1]
         population_data$Settings$Height$Max <- input$height[2]
         population_data$Settings$Weight$Min <- input$weight[1]
@@ -163,6 +194,10 @@ mod_population_server <- function(id, r) {
         )
       } else {
         info_text <- "no physical parameters"
+        # Don't create population characteristics if inputs aren't ready
+        # Clear any previously set characteristics to disable export button
+        r$population_characteristics <- NULL
+        return()
       }
 
       r$inputs$population <- input$population
@@ -173,25 +208,34 @@ mod_population_server <- function(id, r) {
       cli::cli_li("age: {.field {input$age}}")
       cli::cli_li(info_text)
     })
-  })
 
-  observe({
-    req(r$population_characteristics)
-    generated_pop <- ospsuite::createPopulation(
-      r$population_characteristics
-    )
-    r$demographics <- tibble::tibble(
-      id = generated_pop$population$allIndividualIds,
-      age = generated_pop$population$getParameterValues("Organism|Age"),
-      weight = generated_pop$population$getParameterValues("Organism|Weight"),
-      height = ospsuite::toUnit(
-        ospsuite::ospDimensions$Length,
-        generated_pop$population$getParameterValues("Organism|Height"),
-        targetUnit = ospsuite::ospUnits$Length$cm
-      )
-    )
-
-    cli::cli_inform("Population generated.")
+    observe({
+      req(r$population_characteristics)
+      
+      # Additional validation before generating population
+      # This prevents errors when characteristics are temporarily invalid
+      tryCatch({
+        generated_pop <- ospsuite::createPopulation(
+          r$population_characteristics
+        )
+        r$demographics <- tibble::tibble(
+          id = generated_pop$population$allIndividualIds,
+          age = generated_pop$population$getParameterValues("Organism|Age"),
+          weight = generated_pop$population$getParameterValues("Organism|Weight"),
+          height = ospsuite::toUnit(
+            ospsuite::ospDimensions$Length,
+            generated_pop$population$getParameterValues("Organism|Height"),
+            targetUnit = ospsuite::ospUnits$Length$cm
+          )
+        )
+        
+        cli::cli_inform("Population generated.")
+      }, error = function(e) {
+        # Silently fail if population generation fails due to invalid inputs
+        # This can happen when inputs are being modified
+        cli::cli_alert_warning("Population generation skipped: {e$message}")
+      })
+    })
   })
 }
 

@@ -10,7 +10,16 @@
 mod_simulation_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    input_task_button(ns("run"), "Run Simulation", icon = bs_icon("play"))
+    layout_column_wrap(
+      width = 1 / 2,
+      input_task_button(ns("run"), "Run Simulation", icon = bs_icon("play")),
+      downloadButton(
+        ns("export"),
+        "Export Snapshot",
+        icon = icon("download"),
+        class = "btn-secondary w-100"
+      )
+    )
   )
 }
 
@@ -21,7 +30,8 @@ mod_simulation_server <- function(id, r) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    observeEvent(input$run, {
+    # Function to create DDI object from user inputs
+    create_ddi <- function() {
       req(r$inputs$victim)
       req(r$inputs$perpetrator)
       req(r$population_data)
@@ -29,8 +39,6 @@ mod_simulation_server <- function(id, r) {
       req(r$formulation_perpetrator)
       req(r$protocol_victim)
       req(r$protocol_perpetrator)
-
-      r$inputs$run_btn <- input$run
 
       ddi <- cts::create_ddi(cts::compound(r$default_snapshot$source))
 
@@ -101,7 +109,7 @@ mod_simulation_server <- function(id, r) {
           unit = r$simulation_params$duration_unit
         )
 
-      r$ddi <- cts::add_simulation(
+      ddi <- cts::add_simulation(
         ddi,
         ddi_sim,
         options = list(
@@ -110,12 +118,85 @@ mod_simulation_server <- function(id, r) {
         )
       )
 
+      return(ddi)
+    }
+
+    # Reactive to comprehensively validate all inputs for DDI creation
+    inputs_ready <- reactive({
+      # Wrap in tryCatch to catch any unexpected errors during validation
+      tryCatch({
+        # 1. Check compounds are selected
+        if (is.null(r$inputs$victim) || r$inputs$victim == "") return(FALSE)
+        if (is.null(r$inputs$perpetrator) || r$inputs$perpetrator == "") return(FALSE)
+        
+        # 2. Check population is fully configured and valid
+        if (is.null(r$inputs$population) || r$inputs$population == "") return(FALSE)
+        if (is.null(r$population_data)) return(FALSE)
+        if (is.null(r$population_characteristics)) return(FALSE)  # Only set when valid
+        
+        # 3. Check formulations are configured
+        if (is.null(r$formulation_victim)) return(FALSE)
+        if (is.null(r$formulation_perpetrator)) return(FALSE)
+        # Check formulation objects have required fields
+        if (is.null(r$formulation_victim$name)) return(FALSE)
+        if (is.null(r$formulation_perpetrator$name)) return(FALSE)
+        
+        # 4. Check protocols are configured
+        if (is.null(r$protocol_victim)) return(FALSE)
+        if (is.null(r$protocol_perpetrator)) return(FALSE)
+        # Check protocol objects have required fields
+        if (is.null(r$protocol_victim$name)) return(FALSE)
+        if (is.null(r$protocol_perpetrator$name)) return(FALSE)
+        
+        # 5. Check simulation parameters are valid
+        if (is.null(r$simulation_params)) return(FALSE)
+        if (is.null(r$simulation_params$duration_value) || is.na(r$simulation_params$duration_value)) return(FALSE)
+        if (is.null(r$simulation_params$duration_unit) || r$simulation_params$duration_unit == "") return(FALSE)
+        if (is.null(r$simulation_params$resolution) || is.na(r$simulation_params$resolution)) return(FALSE)
+        if (r$simulation_params$duration_value <= 0) return(FALSE)
+        if (r$simulation_params$resolution <= 0) return(FALSE)
+        
+        # All validations passed
+        return(TRUE)
+      }, error = function(e) {
+        # If any validation check errors out, inputs are not ready
+        return(FALSE)
+      })
+    })
+
+    # Enable/disable export button based on input availability
+    observe({
+      if (inputs_ready()) {
+        shinyjs::enable("export")
+      } else {
+        shinyjs::disable("export")
+      }
+    })
+
+    # Run simulation button handler
+    observeEvent(input$run, {
+      r$ddi <- create_ddi()
       req(r$ddi)
 
+      r$inputs$run_btn <- input$run
       r$results$sim_results <- cts::run_ddi(r$ddi)
-
       r$results$pk_results <- cts::run_pk_analysis(r$ddi)
     })
+
+    # Export DDI snapshot
+    output$export <- downloadHandler(
+      filename = function() {
+        timestamp <- format(Sys.time(), "%Y%m%d_%H%M%S")
+        victim <- r$inputs$victim %||% "victim"
+        perpetrator <- r$inputs$perpetrator %||% "perpetrator"
+        glue::glue("DDI_{victim}_{perpetrator}_{timestamp}.json")
+      },
+      content = function(file) {
+        ddi <- create_ddi()
+        req(ddi)
+        cts::export_ddi(ddi, file)
+      }
+    )
   })
 }
 
