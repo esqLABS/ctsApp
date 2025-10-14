@@ -129,6 +129,7 @@ mod_summary_server <- function(id, r) {
           * Application Type: {r$protocol_victim$type %||% 'N/A'}
           * Dosing Interval: {r$protocol_victim$interval %||% 'N/A'}
           * Dose: {r$protocol_victim$dose %||% 'N/A'} {r$protocol_victim$dose_unit %||% ''}
+          * Start Time: {r$protocol_victim$start_time %||% 'N/A'} {r$protocol_victim$start_time_unit %||% ''}
           * End Time: {r$protocol_victim$end_time %||% 'N/A'} {r$protocol_victim$end_time_unit %||% ''}
           * Volume of water/body weight: {r$protocol_victim$water_vol_per_body_weight %||% 'N/A'} {r$protocol_victim$water_vol_per_body_weight_unit %||% ''}
 
@@ -189,6 +190,7 @@ mod_summary_server <- function(id, r) {
           * Application Type: {r$protocol_perpetrator$type %||% 'N/A'}
           * Dosing Interval: {r$protocol_perpetrator$interval %||% 'N/A'}
           * Dose: {r$protocol_perpetrator$dose %||% 'N/A'} {r$protocol_perpetrator$dose_unit %||% ''}
+          * Start Time: {r$protocol_perpetrator$start_time %||% 'N/A'} {r$protocol_perpetrator$start_time_unit %||% ''}
           * End Time: {r$protocol_perpetrator$end_time %||% 'N/A'} {r$protocol_perpetrator$end_time_unit %||% ''}
           * Volume of water/body weight: {r$protocol_perpetrator$water_vol_per_body_weight %||% 'N/A'} {r$protocol_perpetrator$water_vol_per_body_weight_unit %||% ''}
 
