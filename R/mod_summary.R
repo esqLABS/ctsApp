@@ -64,7 +64,7 @@ mod_summary_ui <- function(id) {
       ),
       card_body(
         layout_column_wrap(
-          width = "250px",
+          width = 1 / 4,
           heights_equal = "row",
           shiny::plotOutput(ns("plot_age"), height = "250px"),
           shiny::plotOutput(ns("plot_weight"), height = "250px"),
@@ -215,7 +215,7 @@ mod_summary_server <- function(id, r) {
       demo <- r$demographics
 
       age_subtitle <- sprintf(
-        "Range: %.1f-%.1f years | Mean ± SD: %.1f ± %.1f",
+        "Range: %.1f-%.1f years\nMean ± SD: %.1f ± %.1f",
         min(demo$age),
         max(demo$age),
         mean(demo$age),
@@ -243,7 +243,7 @@ mod_summary_server <- function(id, r) {
       demo <- r$demographics
 
       weight_subtitle <- sprintf(
-        "Range: %.1f-%.1f kg | Mean ± SD: %.1f ± %.1f",
+        "Range: %.1f-%.1f kg\nMean ± SD: %.1f ± %.1f",
         min(demo$weight),
         max(demo$weight),
         mean(demo$weight),
@@ -271,7 +271,7 @@ mod_summary_server <- function(id, r) {
       demo <- r$demographics
 
       height_subtitle <- sprintf(
-        "Range: %.1f-%.1f cm | Mean ± SD: %.1f ± %.1f",
+        "Range: %.1f-%.1f cm\nMean ± SD: %.1f ± %.1f",
         min(demo$height),
         max(demo$height),
         mean(demo$height),
@@ -300,7 +300,7 @@ mod_summary_server <- function(id, r) {
       demo$bmi <- demo$weight / ((demo$height / 100)^2)
 
       bmi_subtitle <- sprintf(
-        "Range: %.1f-%.1f | Mean ± SD: %.1f ± %.1f",
+        "Range: %.1f-%.1f\nMean ± SD: %.1f ± %.1f",
         min(demo$bmi),
         max(demo$bmi),
         mean(demo$bmi),
