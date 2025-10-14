@@ -151,32 +151,32 @@ mod_results_ddi_server <- function(id, r) {
       pk_data_single <- r$results$pk_results$`Single Simulation`
 
       auc_ddi <- pk_data_ddi |>
-        dplyr::filter(Parameter == "AUC_tEnd") |>
+        dplyr::filter(Parameter == "AUC_tDLast_minus_1_tDLast") |>
         dplyr::pull(r$inputs$victim) |>
         unlist()
 
       auc_single <- pk_data_single |>
-        dplyr::filter(Parameter == "AUC_tEnd") |>
+        dplyr::filter(Parameter == "AUC_tDLast_minus_1_tDLast") |>
         dplyr::pull(r$inputs$victim) |>
         unlist()
 
       cmax_ddi <- pk_data_ddi |>
-        dplyr::filter(Parameter == "C_max") |>
+        dplyr::filter(Parameter == "C_max_tDLast_tEnd") |>
         dplyr::pull(r$inputs$victim) |>
         unlist()
 
       cmax_single <- pk_data_single |>
-        dplyr::filter(Parameter == "C_max") |>
+        dplyr::filter(Parameter == "C_max_tDLast_tEnd") |>
         dplyr::pull(r$inputs$victim) |>
         unlist()
 
       tmax_ddi <- pk_data_ddi |>
-        dplyr::filter(Parameter == "t_max") |>
+        dplyr::filter(Parameter == "t_max_tDLast_tEnd") |>
         dplyr::pull(r$inputs$victim) |>
         unlist()
 
       tmax_single <- pk_data_single |>
-        dplyr::filter(Parameter == "t_max") |>
+        dplyr::filter(Parameter == "t_max_tDLast_tEnd") |>
         dplyr::pull(r$inputs$victim) |>
         unlist()
 
