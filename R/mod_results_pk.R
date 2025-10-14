@@ -151,7 +151,7 @@ mod_results_pk_server <- function(id, r) {
       vb_data <- r$results$pk_results$`DDI Simulation`
 
       victim_cmax <- vb_data |>
-        dplyr::filter(Parameter == "Cmax_tDlast_tEnd") |>
+        dplyr::filter(Parameter == "C_max_tDLast_tEnd") |>
         dplyr::pull(r$inputs$victim) |>
         unlist()
 
@@ -161,12 +161,12 @@ mod_results_pk_server <- function(id, r) {
         unique()
 
       victim_tmax <- vb_data |>
-        dplyr::filter(Parameter == "tmax_tDlast-tEnd") |>
+        dplyr::filter(Parameter == "t_max_tDLast_tEnd") |>
         dplyr::pull(r$inputs$victim) |>
         unlist()
 
       victim_auc <- vb_data |>
-        dplyr::filter(Parameter == "AUC_tDlast-1_tDlast") |>
+        dplyr::filter(Parameter == "AUC_tDLast_minus_1_tDLast") |>
         dplyr::pull(r$inputs$victim) |>
         unlist()
 
