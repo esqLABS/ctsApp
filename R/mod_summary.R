@@ -10,20 +10,9 @@
 mod_summary_ui <- function(id) {
   ns <- NS(id)
   tagList(
-    layout_columns(
-      fill = FALSE,
-      value_box(
-        # title = "Building Blocks Summary",
-        showcase = bs_icon("info-circle"),
-        value = "DDI Clinical Trial Simulation Setup",
-        theme = "primary",
-        full_screen = FALSE,
-        "This panel provides a summary of all selected building blocks from the sidebar."
-      )
-    ),
     # Top row: Victim and Perpetrator (2 columns)
     layout_columns(
-      height = "30%",
+      height = "40%",
       col_widths = 1 / 2,
       card(
         card_header(
