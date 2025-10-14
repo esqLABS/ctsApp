@@ -182,9 +182,27 @@ mod_results_pk_server <- function(id, r) {
 
       layout_column_wrap(
         1 / 3,
-        quantile_value_box("Cmax (µg/L)", victim_cmax),
-        quantile_value_box("Tmax (h)", victim_tmax),
-        quantile_value_box("AUC (µg*h/L)", victim_auc)
+        quantile_value_box(
+          tooltip(
+            "Cmax (µg/L)",
+            "Maximum concentration following the last application (Cmax_tDlast_tEnd): The highest concentration reached in plasma after the last dose."
+          ),
+          victim_cmax
+        ),
+        quantile_value_box(
+          tooltip(
+            "Tmax (h)",
+            "Time to maximum concentration following the last application (tmax_tDlast-tEnd): The time at which Cmax is reached after the last dose."
+          ),
+          victim_tmax
+        ),
+        quantile_value_box(
+          tooltip(
+            "AUC (µg*h/L)",
+            "Area under the curve between the (last-1) and last application (AUC_tDlast-1_tDlast): The integral of the concentration-time curve during the last dosing interval, representing total drug exposure."
+          ),
+          victim_auc
+        )
       )
     })
   })
