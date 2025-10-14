@@ -14,35 +14,43 @@ app_ui <- function(request) {
       sidebar = sidebar(
         # title = "Clinical Trial Simulator",
         width = "25vw",
-        accordion(
-          open = TRUE,
-          style = "min-height: 75vh; max-height: 75vh; overflow-y: auto;",
-          accordion_panel(
-            "Victim",
-            icon = bs_icon("capsule"),
-            mod_compound_ui("victim"),
-            mod_protocol_ui("protocol_victim"),
-            mod_formulation_ui("formulation_victim")
-          ),
-          accordion_panel(
-            "Population",
-            icon = bs_icon("people fill"),
-            mod_population_ui("individual_1")
-          ),
-          accordion_panel(
-            "Perpetrator",
-            icon = bs_icon("prescription"),
-            mod_compound_ui("perpetrator"),
-            mod_protocol_ui("protocol_perpetrator"),
-            mod_formulation_ui("formulation_perpetrator")
-          ),
-          accordion_panel(
-            "Simulation Parameters",
-            icon = bs_icon("sliders"),
-            mod_simulation_params_ui("simulation_params")
+        class = "d-flex flex-column",
+        style = "height: 100%;",
+        div(
+          class = "flex-grow-1",
+          style = "overflow-y: auto; min-height: 0;",
+          accordion(
+            open = TRUE,
+            accordion_panel(
+              "Victim",
+              icon = bs_icon("capsule"),
+              mod_compound_ui("victim"),
+              mod_protocol_ui("protocol_victim"),
+              mod_formulation_ui("formulation_victim")
+            ),
+            accordion_panel(
+              "Population",
+              icon = bs_icon("people fill"),
+              mod_population_ui("individual_1")
+            ),
+            accordion_panel(
+              "Perpetrator",
+              icon = bs_icon("prescription"),
+              mod_compound_ui("perpetrator"),
+              mod_protocol_ui("protocol_perpetrator"),
+              mod_formulation_ui("formulation_perpetrator")
+            ),
+            accordion_panel(
+              "Simulation Parameters",
+              icon = bs_icon("sliders"),
+              mod_simulation_params_ui("simulation_params")
+            )
           )
         ),
-        mod_simulation_ui("simulation_1")
+        div(
+          class = "flex-shrink-0 mt-3",
+          mod_simulation_ui("simulation_1")
+        )
       ),
       nav_panel(
         title = "Experiment Design",
@@ -97,8 +105,9 @@ golem_add_external_resources <- function() {
     bundle_resources(
       path = app_sys("app/www"),
       app_title = "ctsApp"
-    )
+    ),
     # Add here other external resources
     # for example, you can add shinyalert::useShinyalert()
+    shinyjs::useShinyjs()
   )
 }
