@@ -15,7 +15,7 @@ mod_protocol_ui <- function(id) {
       ns = ns,
       condition = "input.protocol == 'Create New Protocol'",
       div(
-        style = "background-color: #f8f9fa; padding: 1em; border-radius: 6px;",
+        style = "background-color: #f0f8ff; padding: 1em; border-radius: 6px;",
         layout_column_wrap(
           width = 1 / 2,
           # style = css(grid_template_columns = "1fr 2fr"),
@@ -50,41 +50,47 @@ mod_protocol_ui <- function(id) {
         conditionalPanel(
           ns = ns,
           condition = "input.protocol_type == 'oral'",
-          layout_column_wrap(
-            width = 1 / 2,
-            numericInput(
-              ns("water_vol_per_body_weight"),
-              "Water Volume/Body Weight",
-              value = 3.5
-            ),
-            selectInput(
-              ns("water_vol_per_body_weight_unit"),
-              "Water Volume/Body Weight Unit",
-              choices = c("l/kg", "ml/kg", "µl/kg"),
-              selected = "ml/kg"
+          div(
+            style = "background-color: #e8f4f8; padding: 0.8em; border-radius: 4px; margin-top: 0.5em;",
+            layout_column_wrap(
+              width = 1 / 2,
+              numericInput(
+                ns("water_vol_per_body_weight"),
+                "Water Volume/Body Weight",
+                value = 3.5
+              ),
+              selectInput(
+                ns("water_vol_per_body_weight_unit"),
+                "Water Volume/Body Weight Unit",
+                choices = c("l/kg", "ml/kg", "µl/kg"),
+                selected = "ml/kg"
+              )
             )
           )
         ),
         conditionalPanel(
           ns = ns,
           condition = "input.protocol_type == 'ivb' | input.protocol_type == 'iv'  ",
-          layout_column_wrap(
-            width = 1 / 2,
-            numericInput(ns("infusion_time"), "Infusion Time", value = 0.5),
-            selectInput(
-              ns("infusion_time_unit"),
-              "Infusion Time Unit",
-              choices = c(
-                "s",
-                "min",
-                "h",
-                "day(s)",
-                "week(s)",
-                "month(s)",
-                "year(s)",
-                "ks"
-              ),
-              selected = "h"
+          div(
+            style = "background-color: #e8f4f8; padding: 0.8em; border-radius: 4px; margin-top: 0.5em;",
+            layout_column_wrap(
+              width = 1 / 2,
+              numericInput(ns("infusion_time"), "Infusion Time", value = 0.5),
+              selectInput(
+                ns("infusion_time_unit"),
+                "Infusion Time Unit",
+                choices = c(
+                  "s",
+                  "min",
+                  "h",
+                  "day(s)",
+                  "week(s)",
+                  "month(s)",
+                  "year(s)",
+                  "ks"
+                ),
+                selected = "h"
+              )
             )
           )
         ),
@@ -143,6 +149,8 @@ mod_protocol_server <- function(id, r) {
 
       selected_protocol <- if (grepl("victim", id)) {
         "DRSP_3mg 21 days"
+      } else if (grepl("ee", id)) {
+        "EE 30ug 21 days"
       } else {
         "ITZ 100mg 10 days"
       }

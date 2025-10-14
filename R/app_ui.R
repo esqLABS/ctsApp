@@ -38,7 +38,21 @@ app_ui <- function(request) {
               icon = bs_icon("prescription"),
               mod_compound_ui("perpetrator"),
               mod_protocol_ui("protocol_perpetrator"),
-              mod_formulation_ui("formulation_perpetrator")
+              mod_formulation_ui("formulation_perpetrator"),
+              checkboxInput(
+                "model_ee",
+                "Model Ethinylestradiol (EE) effects",
+                value = FALSE
+              ),
+              conditionalPanel(
+                condition = "input.model_ee == true",
+                div(
+                  style = "background-color: #f0f8ff; padding: 0.5em; border-radius: 6px; margin-top: 0.5em;",
+                  h6("Ethinylestradiol Settings", style = "margin-top: 0;"),
+                  mod_protocol_ui("protocol_ee"),
+                  mod_formulation_ui("formulation_ee")
+                )
+              )
             ),
             accordion_panel(
               "Simulation Parameters",

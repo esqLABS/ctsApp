@@ -45,8 +45,22 @@ mod_simulation_server <- function(id, r) {
       ddi$remove_formulation(ddi$get_names("formulations"))
       ddi$remove_protocol(ddi$get_names("protocols"))
       ddi$populations <- list(r$population_data)
-      ddi$formulations <- c(r$formulation_victim, r$formulation_perpetrator)
-      ddi$protocols <- c(r$protocol_victim, r$protocol_perpetrator)
+      
+      # Add formulations and protocols
+      formulations_list <- list(r$formulation_victim, r$formulation_perpetrator)
+      protocols_list <- list(r$protocol_victim, r$protocol_perpetrator)
+      
+      # Add EE if enabled
+      model_ee <- r$model_ee %||% FALSE
+      if (isTRUE(model_ee)) {
+        req(r$formulation_ee)
+        req(r$protocol_ee)
+        formulations_list <- c(formulations_list, list(r$formulation_ee))
+        protocols_list <- c(protocols_list, list(r$protocol_ee))
+      }
+      
+      ddi$formulations <- formulations_list
+      ddi$protocols <- protocols_list
 
       single_sim <-
         cts::create_simulation(
@@ -80,12 +94,22 @@ mod_simulation_server <- function(id, r) {
         )
       )
 
+      # Build perpetrator list
+      perpetrators_list <- r$inputs$perpetrator
+      output_compounds <- c(r$inputs$victim, r$inputs$perpetrator)
+      
+      model_ee <- r$model_ee %||% FALSE
+      if (isTRUE(model_ee)) {
+        perpetrators_list <- c(perpetrators_list, "Ethinylestradiol 3.0")
+        output_compounds <- c(output_compounds, "Ethinylestradiol 3.0")
+      }
+      
       ddi_sim <-
         cts::create_simulation(
           "DDI Simulation",
           population = r$inputs$population,
           victim = r$inputs$victim,
-          perpetrators = r$inputs$perpetrator
+          perpetrators = perpetrators_list
         ) |>
         cts::set_compound_protocol(
           r$inputs$victim,
@@ -96,10 +120,22 @@ mod_simulation_server <- function(id, r) {
           r$inputs$perpetrator,
           protocol = r$protocol_perpetrator$name,
           formulation = r$formulation_perpetrator$name
-        ) |>
+        )
+      
+      # Add EE protocol if enabled
+      if (isTRUE(model_ee)) {
+        ddi_sim <- ddi_sim |>
+          cts::set_compound_protocol(
+            "Ethinylestradiol 3.0",
+            protocol = r$protocol_ee$name,
+            formulation = r$formulation_ee$name
+          )
+      }
+      
+      ddi_sim <- ddi_sim |>
         cts::set_outputs(
           paths = glue::glue(
-            "Organism|PeripheralVenousBlood|{c(r$inputs$victim, r$inputs$perpetrator)}|Plasma (Peripheral Venous Blood)"
+            "Organism|PeripheralVenousBlood|{output_compounds}|Plasma (Peripheral Venous Blood)"
           )
         ) |>
         cts::set_output_interval(
@@ -155,6 +191,15 @@ mod_simulation_server <- function(id, r) {
         if (is.null(r$simulation_params$resolution) || is.na(r$simulation_params$resolution)) return(FALSE)
         if (r$simulation_params$duration_value <= 0) return(FALSE)
         if (r$simulation_params$resolution <= 0) return(FALSE)
+        
+        # 6. Check EE inputs if modeling EE effects
+        model_ee <- r$model_ee %||% FALSE
+        if (isTRUE(model_ee)) {
+          if (is.null(r$formulation_ee)) return(FALSE)
+          if (is.null(r$protocol_ee)) return(FALSE)
+          if (is.null(r$formulation_ee$name)) return(FALSE)
+          if (is.null(r$protocol_ee$name)) return(FALSE)
+        }
         
         # All validations passed
         return(TRUE)

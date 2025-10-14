@@ -21,12 +21,15 @@ mod_compound_ui <- function(id) {
       conditionalPanel(
         condition = "input.compound == 'Upload Compound'",
         ns = ns,
-        fileInput(
-          ns("upload_snapshot"),
-          "Upload Compound Snapshot",
-          accept = c(".json"),
-          buttonLabel = "Browse...",
-          placeholder = "No file selected"
+        div(
+          style = "background-color: #f0f8ff; padding: 1em; border-radius: 6px; margin-top: 0.5em;",
+          fileInput(
+            ns("upload_snapshot"),
+            "Upload Compound Snapshot",
+            accept = c(".json"),
+            buttonLabel = "Browse...",
+            placeholder = "No file selected"
+          )
         )
       )
     }
