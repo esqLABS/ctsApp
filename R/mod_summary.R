@@ -12,7 +12,7 @@ mod_summary_ui <- function(id) {
   tagList(
     # Top row: Victim and Perpetrator (2 columns)
     layout_columns(
-      height = "40%",
+      height = "60%",
       col_widths = 1 / 2,
       card(
         card_header(
@@ -174,7 +174,7 @@ mod_summary_server <- function(id, r) {
           * Fraction unbound: {fu_data$Value} {fu_data$Unit}
           * Solubility: {solubility_data$Value} {solubility_data$Unit}
           * Processes: {glue::glue_collapse(enzymes,sep=',')}
-          
+
         **Protocol: {r$protocol_perpetrator$name %||% 'N/A'}**
           * Application Type: {r$protocol_perpetrator$type %||% 'N/A'}
           * Dosing Interval: {r$protocol_perpetrator$interval %||% 'N/A'}
@@ -203,8 +203,8 @@ mod_summary_server <- function(id, r) {
       req(r$demographics)
       demo <- r$demographics
 
-      age_subtitle <- sprintf(
-        "Range: %.1f-%.1f years\nMean ± SD: %.1f ± %.1f",
+      age_label <- sprintf(
+        "Range: %.1f-%.1f \nMean: %.1f \nSD: %.1f ",
         min(demo$age),
         max(demo$age),
         mean(demo$age),
@@ -212,18 +212,38 @@ mod_summary_server <- function(id, r) {
       )
 
       ggplot2::ggplot(demo, ggplot2::aes(x = age)) +
-        ggplot2::geom_histogram(
-          bins = 15,
+        ggplot2::geom_density(
           fill = colors["age"],
-          color = "white",
-          alpha = 0.7
+          alpha = 0.6,
+          color = colors["age"],
+          linewidth = 1.2
+        ) +
+        ggplot2::scale_x_continuous(expand = ggplot2::expansion(0, 0)) +
+        ggplot2::scale_y_continuous(
+          expand = ggplot2::expansion(c(0, .15), c(0, 0))
+        ) +
+        ggplot2::annotate(
+          "text",
+          x = min(demo$age) + 0.97 * diff(range(demo$age)),
+          y = -Inf,
+          label = age_label,
+          hjust = "inward",
+          vjust = -.25,
+          size = 3.5,
+          color = "#333333",
+          fontface = "bold"
         ) +
         ggplot2::labs(
           x = "Age (years)",
-          y = "Frequency",
-          subtitle = age_subtitle
+          y = NULL
         ) +
-        ggplot2::theme_minimal()
+        ggplot2::theme_minimal(base_size = 13) +
+        ggplot2::theme(
+          axis.text.y = ggplot2::element_blank(),
+          axis.ticks.y = ggplot2::element_blank(),
+          panel.grid.major.y = ggplot2::element_blank(),
+          panel.grid.minor.y = ggplot2::element_blank()
+        )
     })
 
     # Weight plot
@@ -231,8 +251,8 @@ mod_summary_server <- function(id, r) {
       req(r$demographics)
       demo <- r$demographics
 
-      weight_subtitle <- sprintf(
-        "Range: %.1f-%.1f kg\nMean ± SD: %.1f ± %.1f",
+      weight_label <- sprintf(
+        "Range: %.1f-%.1f  \nMean: %.1f  \nSD: %.1f  ",
         min(demo$weight),
         max(demo$weight),
         mean(demo$weight),
@@ -240,18 +260,38 @@ mod_summary_server <- function(id, r) {
       )
 
       ggplot2::ggplot(demo, ggplot2::aes(x = weight)) +
-        ggplot2::geom_histogram(
-          bins = 15,
+        ggplot2::geom_density(
           fill = colors["weight"],
-          color = "white",
-          alpha = 0.7
+          alpha = 0.6,
+          color = colors["weight"],
+          linewidth = 1.2
+        ) +
+        ggplot2::scale_x_continuous(expand = ggplot2::expansion(0, 0)) +
+        ggplot2::scale_y_continuous(
+          expand = ggplot2::expansion(c(0, .15), c(0, 0))
+        ) +
+        ggplot2::annotate(
+          "text",
+          x = min(demo$weight) + 0.97 * diff(range(demo$weight)),
+          y = -Inf,
+          label = weight_label,
+          hjust = "inward",
+          vjust = -.25,
+          size = 3.5,
+          color = "#333333",
+          fontface = "bold"
         ) +
         ggplot2::labs(
           x = "Weight (kg)",
-          y = "Frequency",
-          subtitle = weight_subtitle
+          y = NULL
         ) +
-        ggplot2::theme_minimal()
+        ggplot2::theme_minimal(base_size = 13) +
+        ggplot2::theme(
+          axis.text.y = ggplot2::element_blank(),
+          axis.ticks.y = ggplot2::element_blank(),
+          panel.grid.major.y = ggplot2::element_blank(),
+          panel.grid.minor.y = ggplot2::element_blank()
+        )
     })
 
     # Height plot
@@ -259,8 +299,8 @@ mod_summary_server <- function(id, r) {
       req(r$demographics)
       demo <- r$demographics
 
-      height_subtitle <- sprintf(
-        "Range: %.1f-%.1f cm\nMean ± SD: %.1f ± %.1f",
+      height_label <- sprintf(
+        "Range: %.1f-%.1f  \nMean: %.1f  \nSD: %.1f  ",
         min(demo$height),
         max(demo$height),
         mean(demo$height),
@@ -268,18 +308,38 @@ mod_summary_server <- function(id, r) {
       )
 
       ggplot2::ggplot(demo, ggplot2::aes(x = height)) +
-        ggplot2::geom_histogram(
-          bins = 15,
+        ggplot2::geom_density(
           fill = colors["height"],
-          color = "white",
-          alpha = 0.7
+          alpha = 0.6,
+          color = colors["height"],
+          linewidth = 1.2
+        ) +
+        ggplot2::scale_x_continuous(expand = ggplot2::expansion(0, 0)) +
+        ggplot2::scale_y_continuous(
+          expand = ggplot2::expansion(c(0, .15), c(0, 0))
+        ) +
+        ggplot2::annotate(
+          "text",
+          x = min(demo$height) + 0.97 * diff(range(demo$height)),
+          y = -Inf,
+          label = height_label,
+          hjust = "inward",
+          vjust = -.25,
+          size = 3.5,
+          color = "#333333",
+          fontface = "bold"
         ) +
         ggplot2::labs(
           x = "Height (cm)",
-          y = "Frequency",
-          subtitle = height_subtitle
+          y = NULL
         ) +
-        ggplot2::theme_minimal()
+        ggplot2::theme_minimal(base_size = 13) +
+        ggplot2::theme(
+          axis.text.y = ggplot2::element_blank(),
+          axis.ticks.y = ggplot2::element_blank(),
+          panel.grid.major.y = ggplot2::element_blank(),
+          panel.grid.minor.y = ggplot2::element_blank()
+        )
     })
 
     # BMI plot
@@ -288,8 +348,8 @@ mod_summary_server <- function(id, r) {
       demo <- r$demographics
       demo$bmi <- demo$weight / ((demo$height / 100)^2)
 
-      bmi_subtitle <- sprintf(
-        "Range: %.1f-%.1f\nMean ± SD: %.1f ± %.1f",
+      bmi_label <- sprintf(
+        "Range: %.1f-%.1f \nMean: %.1f \nSD: %.1f ",
         min(demo$bmi),
         max(demo$bmi),
         mean(demo$bmi),
@@ -297,14 +357,35 @@ mod_summary_server <- function(id, r) {
       )
 
       ggplot2::ggplot(demo, ggplot2::aes(x = bmi)) +
-        ggplot2::geom_histogram(
-          bins = 15,
+        ggplot2::geom_density(
           fill = colors["bmi"],
-          color = "white",
-          alpha = 0.7
+          alpha = 0.6,
+          color = colors["bmi"],
+          linewidth = 1.2
         ) +
-        ggplot2::labs(x = "BMI", y = "Frequency", subtitle = bmi_subtitle) +
-        ggplot2::theme_minimal()
+        ggplot2::scale_x_continuous(expand = ggplot2::expansion(0, 0)) +
+        ggplot2::scale_y_continuous(
+          expand = ggplot2::expansion(c(0, .15), c(0, 0))
+        ) +
+        ggplot2::annotate(
+          "text",
+          x = min(demo$bmi) + 0.97 * diff(range(demo$bmi)),
+          y = -Inf,
+          label = bmi_label,
+          hjust = "inward",
+          vjust = -.25,
+          size = 3.5,
+          color = "#333333",
+          fontface = "bold"
+        ) +
+        ggplot2::labs(x = "BMI", y = NULL) +
+        ggplot2::theme_minimal(base_size = 13) +
+        ggplot2::theme(
+          axis.text.y = ggplot2::element_blank(),
+          axis.ticks.y = ggplot2::element_blank(),
+          panel.grid.major.y = ggplot2::element_blank(),
+          panel.grid.minor.y = ggplot2::element_blank()
+        )
     })
   })
 }
