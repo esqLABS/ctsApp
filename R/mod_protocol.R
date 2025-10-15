@@ -142,27 +142,37 @@ mod_protocol_server <- function(id, r) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    observeEvent(r$default_snapshot, {
+    # Observe protocols - update dropdown when snapshot changes
+    observeEvent(r$snapshot_version, {
       req(r$default_snapshot)
-
-      all_protocol_names <- r$default_snapshot$get_names("protocols")
-
-      selected_protocol <- if (grepl("victim", id)) {
-        "DRSP_3mg 21 days"
-      } else if (grepl("ee", id)) {
-        "EE 30ug 21 days"
+      
+      all_protocols <- r$default_snapshot$get_names("protocols")
+      
+      if (grepl("perpetrator", id)) {
+        updateSelectInput(
+          inputId = "protocol",
+          choices = c(all_protocols, "Create New Protocol"),
+          selected = "ITZ 100mg 10 days"
+        )
       } else {
-        "ITZ 100mg 10 days"
-      }
+        # Victim and EE protocols - filter to DRSP, LNG, or EE
+        filtered_protocols <- stringr::str_subset(
+          all_protocols,
+          pattern = "DRSP|LNG|EE"
+        )
 
-      updateSelectInput(
-        inputId = "protocol",
-        choices = c(
-          all_protocol_names,
-          "Create New Protocol"
-        ),
-        selected = selected_protocol
-      )
+        selected_protocol <- if (grepl("ee", id)) {
+          "EE 30ug 21 days"
+        } else {
+          "DRSP_3mg 21 days"
+        }
+
+        updateSelectInput(
+          inputId = "protocol",
+          choices = c(filtered_protocols, "Create New Protocol"),
+          selected = selected_protocol
+        )
+      }
     })
 
     observe({

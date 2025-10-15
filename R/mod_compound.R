@@ -52,6 +52,14 @@ mod_compound_server <- function(id, r) {
       ))
     })
 
+    # Initialize a version counter to trigger updates
+    observe({
+      req(r$default_snapshot)
+      if (is.null(r$snapshot_version)) {
+        r$snapshot_version <- 1
+      }
+    })
+
     # Handle snapshot upload for perpetrator
     observeEvent(input$upload_snapshot, {
       req(input$upload_snapshot)
@@ -64,56 +72,82 @@ mod_compound_server <- function(id, r) {
             input$upload_snapshot$datapath
           )
 
-          # Extract compounds from uploaded snapshot
-          if (length(uploaded_snapshot$compounds) > 0) {
-            # Get existing compound names (track as we add)
-            existing_names <- r$default_snapshot$get_names("compounds")
+          # Count imported items
+          imported_compounds <- length(uploaded_snapshot$compounds)
+          imported_formulations <- if (
+            !is.null(uploaded_snapshot$formulations)
+          ) {
+            length(uploaded_snapshot$formulations)
+          } else {
+            0
+          }
+          imported_protocols <- if (!is.null(uploaded_snapshot$protocols)) {
+            length(uploaded_snapshot$protocols)
+          } else {
+            0
+          }
 
-            # Process each uploaded compound
+          # Import compounds from uploaded snapshot
+          new_compound_names <- character(0)
+          if (imported_compounds > 0) {
+            existing_names <- r$default_snapshot$get_names("compounds")
             for (compound in uploaded_snapshot$compounds) {
               compound_name <- compound$Name
-
-              # If name already exists, append (imported)
               if (compound_name %in% existing_names) {
                 compound$Name <- paste0(compound_name, " (imported)")
               }
-
-              # Add compound to default snapshot
-              r$default_snapshot$compounds <- c(
-                r$default_snapshot$compounds,
-                list(compound)
-              )
-
-              # Update existing names to include this newly added compound
-              existing_names <- c(existing_names, compound$Name)
+              r$default_snapshot$compounds <- c(r$default_snapshot$compounds, list(compound))
+              new_compound_names <- c(new_compound_names, compound$Name)
             }
+          }
 
-            # Update the compound dropdown
-            compound_names <- r$default_snapshot$get_names("compounds")
-            compound_names <- stringr::str_subset(
-              compound_names,
-              pattern = "Drospirenone|Levonorgestrel",
-              negate = TRUE
-            )
+          # Import formulations from uploaded snapshot  
+          new_formulation_names <- character(0)
+          if (imported_formulations > 0) {
+            existing_names <- r$default_snapshot$get_names("formulations")
+            for (formulation in uploaded_snapshot$formulations) {
+              formulation_name <- formulation$name
+              if (formulation_name %in% existing_names) {
+                formulation$name <- paste0(formulation_name, " (imported)")
+              }
+              r$default_snapshot$formulations <- c(r$default_snapshot$formulations, list(formulation))
+              new_formulation_names <- c(new_formulation_names, formulation$name)
+            }
+          }
 
-            # Add "Upload Compound" option at the beginning for perpetrator
-            compound_names <- c("Upload Compound", compound_names)
+          # Import protocols from uploaded snapshot
+          new_protocol_names <- character(0)
+          if (imported_protocols > 0) {
+            existing_names <- r$default_snapshot$get_names("protocols")
+            for (protocol in uploaded_snapshot$protocols) {
+              protocol_name <- protocol$name
+              if (protocol_name %in% existing_names) {
+                protocol$name <- paste0(protocol_name, " (imported)")
+              }
+              r$default_snapshot$protocols <- c(r$default_snapshot$protocols, list(protocol))
+              new_protocol_names <- c(new_protocol_names, protocol$name)
+            }
+          }
 
-            # Select the first imported compound (last one added)
-            last_compound <- r$default_snapshot$get_names("compounds")
-            last_compound <- last_compound[length(last_compound)]
+          # Track which compound to select and trigger update
+          if (imported_compounds > 0) {
+            r$perpetrator_selected_compound <- new_compound_names[1]  # Select first imported compound
+          }
+          
+          # Trigger dropdown updates
+          r$snapshot_version <- r$snapshot_version + 1
 
-            updateSelectInput(
-              inputId = "compound",
-              choices = compound_names,
-              selected = last_compound
-            )
-
+          # Show success message
+          if (
+            imported_compounds > 0 ||
+              imported_formulations > 0 ||
+              imported_protocols > 0
+          ) {
             cli::cli_alert_success(
-              "Imported {length(uploaded_snapshot$compounds)} compound(s) from snapshot"
+              "Imported {imported_compounds} compound(s), {imported_formulations} formulation(s), and {imported_protocols} protocol(s) from snapshot"
             )
           } else {
-            cli::cli_alert_warning("No compounds found in uploaded snapshot")
+            cli::cli_alert_warning("No items found in uploaded snapshot")
           }
         },
         error = function(e) {
@@ -122,9 +156,12 @@ mod_compound_server <- function(id, r) {
       )
     })
 
-    observeEvent(r$default_snapshot, {
+    # Observe compounds - update dropdown when snapshot changes
+    observeEvent(r$snapshot_version, {
+      req(r$default_snapshot)
+      
       compound_names <- r$default_snapshot$get_names("compounds")
-
+      
       if (id == "victim") {
         compound_names <- stringr::str_subset(
           compound_names,
@@ -135,18 +172,27 @@ mod_compound_server <- function(id, r) {
           choices = compound_names,
           selected = "Drospirenone"
         )
-      } else {
-        # For perpetrator, add "Upload Compound" option at the beginning
+      } else if (id == "perpetrator") {
         compound_names <- stringr::str_subset(
           compound_names,
           pattern = "Drospirenone|Levonorgestrel",
           negate = TRUE
         )
         compound_names <- c("Upload Compound", compound_names)
+        
+        # Use tracked selection if available, otherwise default to Itraconazole
+        selected_compound <- if (!is.null(r$perpetrator_selected_compound)) {
+          sel <- r$perpetrator_selected_compound
+          r$perpetrator_selected_compound <- NULL  # Clear after use
+          sel
+        } else {
+          "Itraconazole"
+        }
+        
         updateSelectInput(
           inputId = "compound",
           choices = compound_names,
-          selected = "Itraconazole"
+          selected = selected_compound
         )
       }
     })

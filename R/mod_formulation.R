@@ -335,27 +335,37 @@ mod_formulation_server <- function(id, r) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    observeEvent(r$default_snapshot, {
+    # Observe formulations - update dropdown when snapshot changes
+    observeEvent(r$snapshot_version, {
       req(r$default_snapshot)
-
-      all_formulation_names <- r$default_snapshot$get_names("formulations")
-
-      selected_formulation <- if (grepl("victim", id)) {
-        "DRSP oral tablet"
-      } else if (grepl("ee", id)) {
-        "EE oral tablet"
+      
+      all_formulations <- r$default_snapshot$get_names("formulations")
+      
+      if (grepl("perpetrator", id)) {
+        updateSelectInput(
+          inputId = "formulation",
+          choices = c(all_formulations, "Create New Formulation"),
+          selected = "ITZ oral tablet"
+        )
       } else {
-        "ITZ oral tablet"
-      }
+        # Victim and EE formulations - filter to DRSP, LNG, or EE
+        filtered_formulations <- stringr::str_subset(
+          all_formulations,
+          pattern = "DRSP|LNG|EE"
+        )
 
-      updateSelectInput(
-        inputId = "formulation",
-        choices = c(
-          all_formulation_names,
-          "Create New Formulation"
-        ),
-        selected = selected_formulation
-      )
+        selected_formulation <- if (grepl("ee", id)) {
+          "EE oral tablet"
+        } else {
+          "DRSP oral tablet"
+        }
+
+        updateSelectInput(
+          inputId = "formulation",
+          choices = c(filtered_formulations, "Create New Formulation"),
+          selected = selected_formulation
+        )
+      }
     })
 
     observe({
