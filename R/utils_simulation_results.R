@@ -54,19 +54,19 @@ get_default_results_path <- function() {
   system.file("extdata", "default_simulation_results.rds", package = "ctsApp")
 }
 
+#' Toggle to enable/disable automatic saving of simulation results
+#' Set to TRUE to save results, FALSE to disable saving
+#' @export
+SAVE_SIMULATION_RESULTS <- FALSE
+
 #' Save simulation results as default results
 #'
 #' @param results List containing sim_results and pk_results
 #' @param r Reactive values object containing input configuration
 #'
-#' @return Invisible NULL. Writes results to inst/data/default_simulation_results.rds
+#' @return Invisible NULL. Writes results to inst/extdata/default_simulation_results.rds
 #' @export
 save_default_results <- function(results, r) {
-  # Verify inputs are default
-  if (!inputs_are_default(r)) {
-    stop("Cannot save as default results - inputs do not match default configuration")
-  }
-  
   # Create metadata
   metadata <- list(
     victim = r$inputs$victim,

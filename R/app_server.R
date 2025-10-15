@@ -9,6 +9,12 @@ app_server <- function(input, output, session) {
 
   r <- reactiveValues()
   r$inputs <- reactiveValues()
+  
+  # Load pre-saved results on app initialization
+  saved_results <- load_default_results()
+  if (!is.null(saved_results)) {
+    r$results <- saved_results
+  }
 
   # Inputs
   mod_compound_server("victim", r)

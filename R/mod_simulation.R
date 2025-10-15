@@ -222,27 +222,7 @@ mod_simulation_server <- function(id, r) {
 
     # Run simulation button handler
     observeEvent(input$run, {
-      # Check if we can load saved default results instead of running
-      if (inputs_are_default(r)) {
-        cli::cli_alert_info("Detected default input configuration")
-        
-        saved_results <- load_default_results()
-        if (!is.null(saved_results)) {
-          r$ddi <- create_ddi()
-          req(r$ddi)
-          r$inputs$run_btn <- input$run
-          r$results$sim_results <- saved_results$sim_results
-          r$results$pk_results <- saved_results$pk_results
-          cli::cli_alert_success("Loaded pre-saved simulation results")
-          return()
-        } else {
-          cli::cli_alert_info(
-            "No saved default results found. Running simulation..."
-          )
-        }
-      }
-      
-      # Run simulation normally
+      # Run simulation
       r$ddi <- create_ddi()
       req(r$ddi)
 
@@ -250,12 +230,16 @@ mod_simulation_server <- function(id, r) {
       r$results$sim_results <- cts::run_ddi(r$ddi)
       r$results$pk_results <- cts::run_pk_analysis(r$ddi)
       
-      # Automatically save results if using default inputs
-      if (inputs_are_default(r)) {
+      # Automatically save results if toggle is enabled
+      save_enabled <- tryCatch(
+        get("SAVE_SIMULATION_RESULTS", envir = asNamespace("ctsApp")),
+        error = function(e) FALSE
+      )
+      if (isTRUE(save_enabled)) {
         tryCatch({
           save_default_results(r$results, r)
         }, error = function(e) {
-          cli::cli_alert_warning("Could not save default results: {e$message}")
+          cli::cli_alert_warning("Could not save results: {e$message}")
         })
       }
     })
