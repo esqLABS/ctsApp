@@ -11,6 +11,7 @@ BugReports: https://github.com/esqLABS/cstApp/issues
 Imports: 
     bsicons,
     bslib,
+    cli,
     config,
     dplyr,
     ggplot2,
