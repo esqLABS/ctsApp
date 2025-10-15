@@ -107,11 +107,11 @@ mod_results_ddi_server <- function(id, r) {
       ) +
         ggplot2::geom_ribbon(
           aes(ymin = min_conc, ymax = max_conc, fill = sim, text = hovertext),
-          alpha = 0.15
+          alpha = 0.4
         ) +
         ggplot2::geom_line(
-          aes(color = sim, text = hovertext),
-          linewidth = 1.2
+          aes(color = sim),
+          linewidth = 0.8
         ) +
         ggplot2::scale_color_manual(values = comparison_colors) +
         ggplot2::scale_fill_manual(values = comparison_colors) +

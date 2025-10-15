@@ -110,11 +110,11 @@ mod_results_pk_server <- function(id, r) {
             fill = molecule,
             text = hovertext
           ),
-          alpha = 0.15
+          alpha = 0.4
         ) +
         ggplot2::geom_line(
-          aes(color = molecule, text = hovertext),
-          linewidth = 1.2
+          aes(color = molecule),
+          linewidth = 1
         ) +
         ggplot2::scale_color_manual(values = color_palette) +
         ggplot2::scale_fill_manual(values = color_palette) +
