@@ -30,6 +30,7 @@ You can install the development version of `{ctsApp}` from [GitHub](https://gith
 pak::pak("esqLABS/cstApp")
 ```
 
+
 ## Run
 
 You can launch the Shiny application by running:
