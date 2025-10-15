@@ -1,23 +1,27 @@
 Package: ctsApp
 Title: A Shiny app to interact with the cts package
 Version: 0.1.0.9001
-Authors@R: 
+Authors@R:
     person("Felix", "MIL", , "felix.mil@esqlabs.com", role = c("aut", "cre"))
 Description: The ctsApp provides a graphical user interface to work with
     the cts framework.
 License: MIT + file LICENSE
 URL: https://github.com/esqLABS/cstApp
 BugReports: https://github.com/esqLABS/cstApp/issues
-Imports: 
+Depends:
+    R (>= 4.1)
+Imports:
     bsicons,
     bslib,
     cli,
     config,
+    cts (>= 1.1.0.9007),
     dplyr,
     ggplot2,
     glue,
     golem,
     lubridate,
+    ospsuite,
     plotly,
     purrr,
     rlang,
@@ -26,8 +30,8 @@ Imports:
     shinyjs,
     shinyWidgets,
     stringr,
-    tidyr
-Suggests: 
+    tibble
+Suggests:
     spelling,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
@@ -35,3 +39,6 @@ Encoding: UTF-8
 Language: en-US
 LazyData: true
 RoxygenNote: 7.3.3
+Remotes:
+    https://github.com/esqLABS/cts,
+    ospsuite=Open-Systems-Pharmacology/OSPSuite-R
