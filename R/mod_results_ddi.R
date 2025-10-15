@@ -28,7 +28,7 @@ mod_results_ddi_ui <- function(id) {
 #' mod_results_ddi Server Functions
 #'
 #' @noRd
-#' @importFrom ggplot2 ggplot aes labs guides geom_line geom_ribbon
+#' @importFrom ggplot2 ggplot aes labs guides geom_line geom_ribbon scale_color_manual scale_fill_manual theme_minimal theme element_text element_blank element_line
 #' @importFrom plotly plotlyOutput renderPlotly ggplotly layout config
 mod_results_ddi_server <- function(id, r) {
   moduleServer(id, function(input, output, session) {
@@ -98,33 +98,71 @@ mod_results_ddi_server <- function(id, r) {
         "] µg/L"
       )
 
+      # Modern color palette for comparison
+      comparison_colors <- c("#667eea", "#f093fb")
+
       p <- ggplot2::ggplot(
         summary_data,
         aes(x = time, y = mean_conc, group = sim)
       ) +
-        ggplot2::geom_line(aes(color = sim, text = hovertext)) +
         ggplot2::geom_ribbon(
           aes(ymin = min_conc, ymax = max_conc, fill = sim, text = hovertext),
-          alpha = 0.6
+          alpha = 0.15
         ) +
+        ggplot2::geom_line(
+          aes(color = sim, text = hovertext),
+          linewidth = 1.2
+        ) +
+        ggplot2::scale_color_manual(values = comparison_colors) +
+        ggplot2::scale_fill_manual(values = comparison_colors) +
         ggplot2::labs(
           title = glue::glue("Concentration Time Profile of {r$inputs$victim}"),
           fill = NULL,
+          color = NULL,
           y = "Concentration [µg/L]",
           x = "Time [h]"
         ) +
-        ggplot2::guides(color = FALSE)
+        ggplot2::theme_minimal(base_size = 13) +
+        ggplot2::theme(
+          plot.title = element_text(face = "bold", size = 15),
+          panel.grid.minor = element_blank(),
+          panel.grid.major = element_line(color = "#f0f0f0", linewidth = 0.5),
+          axis.title = element_text(face = "bold", size = 12),
+          legend.position = "bottom"
+        )
 
       # Create plotly object with tooltip using the text aesthetic
       plotly::ggplotly(p, tooltip = "text") |>
         plotly::layout(
           hovermode = "closest",
+          plot_bgcolor = "#ffffff",
+          paper_bgcolor = "#ffffff",
+          font = list(
+            family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+            size = 13,
+            color = "#2d3748"
+          ),
+          xaxis = list(
+            gridcolor = "#f7fafc",
+            gridwidth = 1,
+            zerolinecolor = "#e2e8f0",
+            zerolinewidth = 2
+          ),
+          yaxis = list(
+            gridcolor = "#f7fafc",
+            gridwidth = 1,
+            zerolinecolor = "#e2e8f0",
+            zerolinewidth = 2
+          ),
           legend = list(
-            orientation = "h", # horizontal legend
-            xanchor = "center", # use center of legend as anchor
-            x = 0.5, # position at center of x-axis
-            y = -0.15, # position below the plot
-            yanchor = "top" # use top of legend as anchor
+            orientation = "h",
+            xanchor = "center",
+            x = 0.5,
+            y = -0.15,
+            yanchor = "top",
+            bgcolor = "rgba(255,255,255,0.9)",
+            bordercolor = "#e2e8f0",
+            borderwidth = 1
           )
         ) |>
         plotly::config(

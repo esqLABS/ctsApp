@@ -192,10 +192,10 @@ mod_summary_server <- function(id, r) {
 
     # Population demographics plots - Color palette
     colors <- c(
-      age = "#1f77b4",
-      weight = "#ff7f0e",
-      height = "#2ca02c",
-      bmi = "#d62728"
+      age = "#007bc2",
+      weight = "#007bc2",
+      height = "#007bc2",
+      bmi = "#007bc2"
     )
 
     # Age plot
