@@ -6,16 +6,18 @@
 #' @noRd
 inputs_are_default <- function(r) {
   # Check if all required inputs exist
-  if (is.null(r$inputs$victim) || 
+  if (
+    is.null(r$inputs$victim) ||
       is.null(r$inputs$perpetrator) ||
       is.null(r$inputs$population) ||
-      is.null(r$simulation_params)) {
+      is.null(r$simulation_params)
+  ) {
     return(FALSE)
   }
-  
+
   # Check EE status (default is FALSE/NULL)
   model_ee <- r$model_ee %||% FALSE
-  
+
   # Define default values
   default_victim <- "Drospirenone"
   default_perpetrator <- "Itraconazole"
@@ -24,16 +26,18 @@ inputs_are_default <- function(r) {
   default_duration_unit <- "h"
   default_resolution <- 4
   default_model_ee <- FALSE
-  
+
   # Check each input against defaults
   victim_match <- r$inputs$victim == default_victim
   perpetrator_match <- r$inputs$perpetrator == default_perpetrator
   population_match <- r$inputs$population == default_population
-  duration_value_match <- r$simulation_params$duration_value == default_duration_value
-  duration_unit_match <- r$simulation_params$duration_unit == default_duration_unit
+  duration_value_match <- r$simulation_params$duration_value ==
+    default_duration_value
+  duration_unit_match <- r$simulation_params$duration_unit ==
+    default_duration_unit
   resolution_match <- r$simulation_params$resolution == default_resolution
   ee_match <- isTRUE(model_ee) == default_model_ee
-  
+
   # Return TRUE only if all match
   all(
     victim_match,
@@ -79,17 +83,17 @@ save_default_results <- function(results, r) {
     timestamp = Sys.time(),
     platform = Sys.info()[["sysname"]]
   )
-  
+
   # Bundle results with metadata
   saved_data <- list(
     metadata = metadata,
     sim_results = results$sim_results,
     pk_results = results$pk_results
   )
-  
+
   # Determine save path using system.file
   extdata_dir <- system.file("extdata", package = "ctsApp")
-  
+
   # If package is not installed (development mode), save to inst/extdata
   if (extdata_dir == "") {
     inst_extdata_dir <- file.path("inst", "extdata")
@@ -101,17 +105,17 @@ save_default_results <- function(results, r) {
     # Installed package - save to package extdata directory
     save_path <- file.path(extdata_dir, "default_simulation_results.rds")
   }
-  
+
   # Save results
   saveRDS(saved_data, save_path)
-  
+
   cli::cli_alert_success(
     "Saved default simulation results to {.file {save_path}}"
   )
   cli::cli_alert_info(
     "Platform: {metadata$platform}, Timestamp: {metadata$timestamp}"
   )
-  
+
   invisible(NULL)
 }
 
@@ -121,39 +125,43 @@ save_default_results <- function(results, r) {
 #' @noRd
 load_default_results <- function() {
   results_path <- get_default_results_path()
-  
+
   # Check if file exists
   if (!file.exists(results_path) || results_path == "") {
     return(NULL)
   }
-  
-  # Load saved data
-  tryCatch({
-    saved_data <- readRDS(results_path)
-    
-    # Validate structure
-    if (!all(c("metadata", "sim_results", "pk_results") %in% names(saved_data))) {
-      cli::cli_alert_warning("Saved results file has invalid structure")
-      return(NULL)
-    }
-    
-    # Log metadata
-    cli::cli_alert_success("Loaded pre-saved simulation results")
-    cli::cli_alert_info(
-      "Configuration: {saved_data$metadata$victim} + {saved_data$metadata$perpetrator}"
-    )
-    cli::cli_alert_info(
-      "Saved on {saved_data$metadata$platform} at {saved_data$metadata$timestamp}"
-    )
-    
-    # Return just the results (not metadata)
-    list(
-      sim_results = saved_data$sim_results,
-      pk_results = saved_data$pk_results
-    )
-  }, error = function(e) {
-    cli::cli_alert_warning("Error loading saved results: {e$message}")
-    NULL
-  })
-}
 
+  # Load saved data
+  tryCatch(
+    {
+      saved_data <- readRDS(results_path)
+
+      # Validate structure
+      if (
+        !all(c("metadata", "sim_results", "pk_results") %in% names(saved_data))
+      ) {
+        cli::cli_alert_warning("Saved results file has invalid structure")
+        return(NULL)
+      }
+
+      # Log metadata
+      cli::cli_alert_success("Loaded pre-saved simulation results")
+      cli::cli_alert_info(
+        "Configuration: {saved_data$metadata$victim} + {saved_data$metadata$perpetrator}"
+      )
+      cli::cli_alert_info(
+        "Saved on {saved_data$metadata$platform} at {saved_data$metadata$timestamp}"
+      )
+
+      # Return just the results (not metadata)
+      list(
+        sim_results = saved_data$sim_results,
+        pk_results = saved_data$pk_results
+      )
+    },
+    error = function(e) {
+      cli::cli_alert_warning("Error loading saved results: {e$message}")
+      NULL
+    }
+  )
+}

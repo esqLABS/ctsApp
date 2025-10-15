@@ -14,10 +14,6 @@ mod_results_ddi_ui <- function(id) {
     uiOutput(ns("value_boxes")),
     card(
       fill = TRUE,
-      card_header(
-        class = "d-flex justify-content-between",
-        "DDI Comparison"
-      ),
       card_body(
         plotlyOutput(ns("plot"))
       )
@@ -28,8 +24,7 @@ mod_results_ddi_ui <- function(id) {
 #' mod_results_ddi Server Functions
 #'
 #' @noRd
-#' @importFrom ggplot2 ggplot aes labs guides geom_line geom_ribbon scale_color_manual scale_fill_manual theme_minimal theme element_text element_blank element_line
-#' @importFrom plotly plotlyOutput renderPlotly ggplotly layout config
+#' @importFrom plotly plotlyOutput renderPlotly plot_ly add_ribbons add_lines layout config
 mod_results_ddi_server <- function(id, r) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -80,61 +75,81 @@ mod_results_ddi_server <- function(id, r) {
           .groups = "drop"
         )
 
-      # Create a column with the hover text
-      summary_data$hovertext <- paste0(
-        "<b>",
-        summary_data$sim,
-        "</b><br>",
-        "Time: ",
-        round(summary_data$time, 2),
-        " h<br>",
-        "Mean: ",
-        round(summary_data$mean_conc, 2),
-        " µg/L<br>",
-        "Range: [",
-        round(summary_data$min_conc, 2),
-        " - ",
-        round(summary_data$max_conc, 2),
-        "] µg/L"
-      )
-
       # Modern color palette for comparison
-      comparison_colors <- c("#667eea", "#f093fb")
+      comparison_colors <- c("#f43d3dff", "#667eea")
 
-      p <- ggplot2::ggplot(
-        summary_data,
-        aes(x = time, y = mean_conc, group = sim)
-      ) +
-        ggplot2::geom_ribbon(
-          aes(ymin = min_conc, ymax = max_conc, fill = sim, text = hovertext),
-          alpha = 0.4
-        ) +
-        ggplot2::geom_line(
-          aes(color = sim),
-          linewidth = 0.8
-        ) +
-        ggplot2::scale_color_manual(values = comparison_colors) +
-        ggplot2::scale_fill_manual(values = comparison_colors) +
-        ggplot2::labs(
-          title = glue::glue("Concentration Time Profile of {r$inputs$victim}"),
-          fill = NULL,
-          color = NULL,
-          y = "Concentration [µg/L]",
-          x = "Time [h]"
-        ) +
-        ggplot2::theme_minimal(base_size = 13) +
-        ggplot2::theme(
-          plot.title = element_text(face = "bold", size = 15),
-          panel.grid.minor = element_blank(),
-          panel.grid.major = element_line(color = "#f0f0f0", linewidth = 0.5),
-          axis.title = element_text(face = "bold", size = 12),
-          legend.position = "bottom"
-        )
+      # Create named color vector
+      sims <- unique(summary_data$sim)
+      color_map <- setNames(comparison_colors, sims)
 
-      # Create plotly object with tooltip using the text aesthetic
-      plotly::ggplotly(p, tooltip = "text") |>
+      # Create plotly object directly
+      p <- plotly::plot_ly()
+
+      # Add traces for each simulation
+      for (s in sims) {
+        sim_data <- summary_data[summary_data$sim == s, ]
+        
+        # Add lower bound of ribbon first
+        p <- p |>
+          plotly::add_trace(
+            data = sim_data,
+            x = ~time,
+            y = ~min_conc,
+            type = 'scatter',
+            mode = 'lines',
+            line = list(width = 0),
+            showlegend = FALSE,
+            hoverinfo = 'none'
+          )
+        
+        # Add upper bound of ribbon (fills to previous trace)
+        p <- p |>
+          plotly::add_trace(
+            data = sim_data,
+            x = ~time,
+            y = ~max_conc,
+            type = 'scatter',
+            mode = 'lines',
+            line = list(width = 0),
+            fillcolor = paste0(substr(color_map[s], 1, 7), "66"),  # Add transparency
+            fill = 'tonexty',
+            showlegend = FALSE,
+            hoverinfo = 'none'
+          )
+        
+        # Add line with custom hovertemplate
+        p <- p |>
+          plotly::add_lines(
+            data = sim_data,
+            x = ~time,
+            y = ~mean_conc,
+            line = list(color = color_map[s], width = 2),
+            name = s,
+            showlegend = TRUE,
+            text = ~paste0(round(min_conc, 2), " - ", round(max_conc, 2)),
+            hovertemplate = paste0(
+              "<b>", s, "</b><br>",
+              "%{y:.2f} µg/L<br>",
+              "<span style='font-size:0.9em'>Range: [%{text}]</span>",
+              "<extra></extra>"
+            ),
+            hoverlabel = list(bgcolor = color_map[s])
+          )
+      }
+
+      # Apply layout
+      p |>
         plotly::layout(
-          hovermode = "closest",
+          title = list(
+            text = glue::glue(
+              "Concentration Time Profile of {r$inputs$victim}"
+            ),
+            font = list(
+              size = 15,
+              family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+            )
+          ),
+          hovermode = "x unified",
           plot_bgcolor = "#ffffff",
           paper_bgcolor = "#ffffff",
           font = list(
@@ -143,12 +158,14 @@ mod_results_ddi_server <- function(id, r) {
             color = "#2d3748"
           ),
           xaxis = list(
+            title = list(text = "Time [h]", font = list(size = 12)),
             gridcolor = "#f7fafc",
             gridwidth = 1,
             zerolinecolor = "#e2e8f0",
             zerolinewidth = 2
           ),
           yaxis = list(
+            title = list(text = "Concentration [µg/L]", font = list(size = 12)),
             gridcolor = "#f7fafc",
             gridwidth = 1,
             zerolinecolor = "#e2e8f0",
