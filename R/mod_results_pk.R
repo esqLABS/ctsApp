@@ -13,17 +13,17 @@ mod_results_pk_ui <- function(id) {
     uiOutput(ns("value_boxes")),
     card(
       fill = TRUE,
-      card_header(
-        class = "d-flex justify-content-between",
-        "Time Profile",
+      # card_header(
+      #   class = "d-flex justify-content-between",
+      #   "Time Profile",
+      # ),
+      card_body(
         checkboxInput(
           ns("show_perpetrator"),
-          "Display Perpetrator",
+          "Show Perpetrator",
           FALSE,
           width = "auto"
-        )
-      ),
-      card_body(
+        ),
         plotlyOutput(ns("plot"))
       )
     )
@@ -33,8 +33,7 @@ mod_results_pk_ui <- function(id) {
 #' results_general Server Functions
 #'
 #' @noRd
-#' @importFrom ggplot2 ggplot aes stat_summary labs guides geom_line geom_ribbon
-#' @importFrom plotly plotlyOutput renderPlotly ggplotly layout config
+#' @importFrom plotly plotlyOutput renderPlotly plot_ly add_ribbons add_lines layout config
 mod_results_pk_server <- function(id, r) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -76,56 +75,114 @@ mod_results_pk_server <- function(id, r) {
           .groups = "drop"
         )
 
-      # Create a column with the hover text
-      summary_data$hovertext <- paste0(
-        "<b>",
-        summary_data$molecule,
-        "</b><br>",
-        "Time: ",
-        round(summary_data$time, 2),
-        " h<br>",
-        "Mean: ",
-        round(summary_data$mean_conc, 2),
-        " µg/L<br>",
-        "Range: [",
-        round(summary_data$min_conc, 2),
-        " - ",
-        round(summary_data$max_conc, 2),
-        "] µg/L"
-      )
+      # Modern color palette
+      n_molecules <- length(unique(summary_data$molecule))
+      colors <- c("#667eea", "#764ba2", "#f093fb", "#4facfe", "#00f2fe")
+      color_palette <- colors[1:min(n_molecules, length(colors))]
 
-      p <- ggplot2::ggplot(
-        summary_data,
-        aes(x = time, y = mean_conc, group = molecule)
-      ) +
-        ggplot2::geom_line(aes(color = molecule, text = hovertext)) +
-        ggplot2::geom_ribbon(
-          aes(
-            ymin = min_conc,
-            ymax = max_conc,
-            fill = molecule,
-            text = hovertext
-          ),
-          alpha = 0.6
-        ) +
-        ggplot2::labs(
-          title = "Concentration Time Profile",
-          fill = "Compounds",
-          y = "Concentration [µg/L]",
-          x = "Time [h]"
-        ) +
-        ggplot2::guides(color = FALSE)
+      # Create named color vector
+      molecules <- unique(summary_data$molecule)
+      color_map <- setNames(color_palette, molecules)
 
-      # Create plotly object with tooltip using the text aesthetic
-      plotly::ggplotly(p, tooltip = "text") |>
+      # Create plotly object directly
+      p <- plotly::plot_ly()
+
+      # Add traces for each molecule
+      for (mol in molecules) {
+        mol_data <- summary_data[summary_data$molecule == mol, ]
+
+        # Add lower bound of ribbon first
+        p <- p |>
+          plotly::add_trace(
+            data = mol_data,
+            x = ~time,
+            y = ~min_conc,
+            type = 'scatter',
+            mode = 'lines',
+            line = list(width = 0),
+            showlegend = FALSE,
+            hoverinfo = 'none'
+          )
+        
+        # Add upper bound of ribbon (fills to previous trace)
+        p <- p |>
+          plotly::add_trace(
+            data = mol_data,
+            x = ~time,
+            y = ~max_conc,
+            type = 'scatter',
+            mode = 'lines',
+            line = list(width = 0),
+            fillcolor = paste0(substr(color_map[mol], 1, 7), "66"),  # Add transparency
+            fill = 'tonexty',
+            showlegend = FALSE,
+            hoverinfo = 'none'
+          )
+        
+        # Add line with custom hovertemplate
+        p <- p |>
+          plotly::add_lines(
+            data = mol_data,
+            x = ~time,
+            y = ~mean_conc,
+            line = list(color = color_map[mol], width = 2),
+            name = mol,
+            showlegend = TRUE,
+            text = ~paste0(round(min_conc, 2), " - ", round(max_conc, 2)),
+            hovertemplate = paste0(
+              "<b>", mol, "</b><br>",
+              "%{y:.2f} µg/L<br>",
+              "<span style='font-size:0.9em'>Range: [%{text}]</span>",
+              "<extra></extra>"
+            ),
+            hoverlabel = list(bgcolor = color_map[mol])
+          )
+      }
+
+      # Apply layout
+      p |>
         plotly::layout(
-          hovermode = "closest",
+          title = list(
+            text = glue::glue(
+              "Concentration Time Profile of {r$inputs$victim}"
+            ),
+            font = list(
+              size = 15,
+              family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+            )
+          ),
+          hovermode = "x unified",
+          plot_bgcolor = "#ffffff",
+          paper_bgcolor = "#ffffff",
+          font = list(
+            family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+            size = 13,
+            color = "#2d3748"
+          ),
+          xaxis = list(
+            title = list(text = "Time [h]", font = list(size = 12)),
+            gridcolor = "#f7fafc",
+            gridwidth = 1,
+            zerolinecolor = "#e2e8f0",
+            zerolinewidth = 2
+          ),
+          yaxis = list(
+            title = list(text = "Concentration [µg/L]", font = list(size = 12)),
+            gridcolor = "#f7fafc",
+            gridwidth = 1,
+            zerolinecolor = "#e2e8f0",
+            zerolinewidth = 2
+          ),
           legend = list(
-            orientation = "h", # horizontal legend
-            xanchor = "center", # use center of legend as anchor
-            x = 0.5, # position at center of x-axis
-            y = -0.15, # position below the plot
-            yanchor = "top" # use top of legend as anchor
+            title = list(text = "Compounds"),
+            orientation = "h",
+            xanchor = "center",
+            x = 0.5,
+            y = -0.15,
+            yanchor = "top",
+            bgcolor = "rgba(255,255,255,0.9)",
+            bordercolor = "#e2e8f0",
+            borderwidth = 1
           )
         ) |>
         plotly::config(
@@ -151,7 +208,7 @@ mod_results_pk_server <- function(id, r) {
       vb_data <- r$results$pk_results$`DDI Simulation`
 
       victim_cmax <- vb_data |>
-        dplyr::filter(Parameter == "Cmax_tDlast_tEnd") |>
+        dplyr::filter(Parameter == "C_max_tDLast_tEnd") |>
         dplyr::pull(r$inputs$victim) |>
         unlist()
 
@@ -161,12 +218,12 @@ mod_results_pk_server <- function(id, r) {
         unique()
 
       victim_tmax <- vb_data |>
-        dplyr::filter(Parameter == "tmax_tDlast-tEnd") |>
+        dplyr::filter(Parameter == "t_max_tDLast_tEnd") |>
         dplyr::pull(r$inputs$victim) |>
         unlist()
 
       victim_auc <- vb_data |>
-        dplyr::filter(Parameter == "AUC_tDlast-1_tDlast") |>
+        dplyr::filter(Parameter == "AUC_tDLast_minus_1_tDLast") |>
         dplyr::pull(r$inputs$victim) |>
         unlist()
 
@@ -182,9 +239,27 @@ mod_results_pk_server <- function(id, r) {
 
       layout_column_wrap(
         1 / 3,
-        quantile_value_box("Cmax (µg/L)", victim_cmax),
-        quantile_value_box("Tmax (h)", victim_tmax),
-        quantile_value_box("AUC (µg*h/L)", victim_auc)
+        quantile_value_box(
+          tooltip(
+            "Cmax (µg/L)",
+            "Maximum concentration following the last application (Cmax_tDlast_tEnd): The highest concentration reached in plasma after the last dose."
+          ),
+          victim_cmax
+        ),
+        quantile_value_box(
+          tooltip(
+            "Tmax (h)",
+            "Time to maximum concentration following the last application (tmax_tDlast-tEnd): The time at which Cmax is reached after the last dose."
+          ),
+          victim_tmax
+        ),
+        quantile_value_box(
+          tooltip(
+            "AUC (µg*h/L)",
+            "Area under the curve between the (last-1) and last application (AUC_tDlast-1_tDlast): The integral of the concentration-time curve during the last dosing interval, representing total drug exposure."
+          ),
+          victim_auc
+        )
       )
     })
   })

@@ -9,6 +9,12 @@ app_server <- function(input, output, session) {
 
   r <- reactiveValues()
   r$inputs <- reactiveValues()
+  
+  # Load pre-saved results on app initialization
+  saved_results <- load_default_results()
+  if (!is.null(saved_results)) {
+    r$results <- saved_results
+  }
 
   # Inputs
   mod_compound_server("victim", r)
@@ -18,6 +24,15 @@ app_server <- function(input, output, session) {
   mod_protocol_server("protocol_perpetrator", r)
   mod_formulation_server("formulation_victim", r)
   mod_formulation_server("formulation_perpetrator", r)
+  
+  # EE (Ethinylestradiol) modules
+  mod_protocol_server("protocol_ee", r)
+  mod_formulation_server("formulation_ee", r)
+  
+  # Capture EE checkbox state
+  observe({
+    r$model_ee <- input$model_ee
+  })
 
   # Simulation Parameters
   mod_simulation_params_server("simulation_params", r)

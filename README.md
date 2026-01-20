@@ -4,56 +4,40 @@
 # `{ctsApp}`
 
 <!-- badges: start -->
+
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
+
+The `{ctsApp}` package provides a graphical user interface (Shiny app)
+for the `{cts}` (Contraceptives DDI Trial Simulation Platform) package.
+It offers an intuitive web-based interface to design and simulate
+drug-drug interactions (DDI) involving contraceptive drugs using
+physiologically based pharmacokinetic (PBPK) models.
 
 ## Installation
 
-You can install the development version of `{ctsApp}` like so:
+You can install the development version of `{ctsApp}` from
+[GitHub](https://github.com/esqLABS/cstApp) with:
 
 ``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+# install.packages("pak")
+pak::pak("esqLABS/cstApp")
 ```
 
 ## Run
 
-You can launch the application by running:
+You can launch the Shiny application by running:
 
 ``` r
 ctsApp::run_app()
 ```
 
-## About
+This will open the application in your default web browser, providing an
+interactive interface to:
 
-You are reading the doc about version : 0.0.0.9000
-
-This README has been compiled on the
-
-``` r
-Sys.time()
-#> [1] "2025-01-16 14:32:46 CET"
-```
-
-Here are the tests results and package coverage:
-
-``` r
-devtools::check(quiet = TRUE)
-#> ══ Documenting ═════════════════════════════════════════════════════════════════
-#> ℹ Installed roxygen2 version (7.3.2) doesn't match required (7.1.1)
-#> ✖ `check()` will not re-document this package
-#> ── R CMD check results ────────────────────────────────── ctsApp 0.0.0.9000 ────
-#> Duration: 10.5s
-#> 
-#> ❯ checking for future file timestamps ... NOTE
-#>   unable to verify current time
-#> 
-#> ❯ checking top-level files ... NOTE
-#>   Non-standard file/directory found at top level:
-#>     ‘dev’
-#> 
-#> 0 errors ✔ | 0 warnings ✔ | 2 notes ✖
-```
-
-``` r
-covr::package_coverage()
-#> Error in loadNamespace(x): there is no package called 'covr'
-```
+- Import and explore compound models from the OSP model library
+- Design DDI simulations between compounds
+- Configure dosing protocols and individual characteristics
+- Run simulations and analyze results with built-in plots and tables
+- Export simulation results for further analysis in PK-Sim

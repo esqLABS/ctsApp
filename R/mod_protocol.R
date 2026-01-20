@@ -15,7 +15,7 @@ mod_protocol_ui <- function(id) {
       ns = ns,
       condition = "input.protocol == 'Create New Protocol'",
       div(
-        style = "background-color: #f8f9fa; padding: 1em; border-radius: 6px;",
+        style = "background-color: #f0f8ff; padding: 1em; border-radius: 6px;",
         layout_column_wrap(
           width = 1 / 2,
           # style = css(grid_template_columns = "1fr 2fr"),
@@ -50,51 +50,84 @@ mod_protocol_ui <- function(id) {
         conditionalPanel(
           ns = ns,
           condition = "input.protocol_type == 'oral'",
-          layout_column_wrap(
-            width = 1 / 2,
-            numericInput(
-              ns("water_vol_per_body_weight"),
-              "Water Volume/Body Weight",
-              value = 3.5
-            ),
-            selectInput(
-              ns("water_vol_per_body_weight_unit"),
-              "Water Volume/Body Weight Unit",
-              choices = c("l/kg", "ml/kg", "µl/kg"),
-              selected = "ml/kg"
+          div(
+            style = "background-color: #e8f4f8; padding: 0.8em; border-radius: 4px; margin-top: 0.5em;",
+            layout_column_wrap(
+              width = 1 / 2,
+              numericInput(
+                ns("water_vol_per_body_weight"),
+                "Water Volume/Body Weight",
+                value = 3.5
+              ),
+              selectInput(
+                ns("water_vol_per_body_weight_unit"),
+                "Water Volume/Body Weight Unit",
+                choices = c("l/kg", "ml/kg", "µl/kg"),
+                selected = "ml/kg"
+              )
             )
           )
         ),
         conditionalPanel(
           ns = ns,
           condition = "input.protocol_type == 'ivb' | input.protocol_type == 'iv'  ",
-          layout_column_wrap(
-            width = 1 / 2,
-            numericInput(ns("infusion_time"), "Infusion Time", value = 0.5),
-            selectInput(
-              ns("infusion_time_unit"),
-              "Infusion Time Unit",
-              choices = c(
-                "s",
-                "min",
-                "h",
-                "day(s)",
-                "week(s)",
-                "month(s)",
-                "year(s)",
-                "ks"
-              ),
-              selected = "h"
+          div(
+            style = "background-color: #e8f4f8; padding: 0.8em; border-radius: 4px; margin-top: 0.5em;",
+            layout_column_wrap(
+              width = 1 / 2,
+              numericInput(ns("infusion_time"), "Infusion Time", value = 0.5),
+              selectInput(
+                ns("infusion_time_unit"),
+                "Infusion Time Unit",
+                choices = c(
+                  "s",
+                  "min",
+                  "h",
+                  "day(s)",
+                  "week(s)",
+                  "month(s)",
+                  "year(s)",
+                  "ks"
+                ),
+                selected = "h"
+              )
             )
           )
         ),
         layout_column_wrap(
           width = 1 / 2,
-          numericInput(ns("duration"), "Duration (days)", value = 7),
-          shinyWidgets::timeInput(
-            ns("start_time"),
-            "First Intake Time",
-            value = "08:00"
+          numericInput(ns("start_time"), "Start Time", value = 0),
+          selectInput(
+            ns("start_time_unit"),
+            "Start Time Unit",
+            choices = c(
+              "s",
+              "min",
+              "h",
+              "day(s)",
+              "week(s)",
+              "month(s)",
+              "year(s)",
+              selected = "day(s)"
+            )
+          )
+        ),
+        layout_column_wrap(
+          width = 1 / 2,
+          numericInput(ns("end_time"), "End Time", value = 30),
+          selectInput(
+            ns("end_time_unit"),
+            "End Time Unit",
+            choices = c(
+              "s",
+              "min",
+              "h",
+              "day(s)",
+              "week(s)",
+              "month(s)",
+              "year(s)"
+            ),
+            selected = "day(s)"
           )
         )
       )
@@ -109,25 +142,37 @@ mod_protocol_server <- function(id, r) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    observeEvent(r$default_snapshot, {
+    # Observe protocols - update dropdown when snapshot changes
+    observeEvent(r$snapshot_version, {
       req(r$default_snapshot)
-
-      all_protocol_names <- r$default_snapshot$get_names("protocols")
-
-      selected_protocol <- if (grepl("victim", id)) {
-        "DRSP_3mg 21 days"
+      
+      all_protocols <- r$default_snapshot$get_names("protocols")
+      
+      if (grepl("perpetrator", id)) {
+        updateSelectInput(
+          inputId = "protocol",
+          choices = c(all_protocols, "Create New Protocol"),
+          selected = "ITZ 100mg 10 days"
+        )
       } else {
-        "ITZ 100mg 10 days"
-      }
+        # Victim and EE protocols - filter to DRSP, LNG, or EE
+        filtered_protocols <- stringr::str_subset(
+          all_protocols,
+          pattern = "DRSP|LNG|EE"
+        )
 
-      updateSelectInput(
-        inputId = "protocol",
-        choices = c(
-          all_protocol_names,
-          "Create New Protocol"
-        ),
-        selected = selected_protocol
-      )
+        selected_protocol <- if (grepl("ee", id)) {
+          "EE 30ug 21 days"
+        } else {
+          "DRSP_3mg 21 days"
+        }
+
+        updateSelectInput(
+          inputId = "protocol",
+          choices = c(filtered_protocols, "Create New Protocol"),
+          selected = selected_protocol
+        )
+      }
     })
 
     observe({
@@ -136,7 +181,6 @@ mod_protocol_server <- function(id, r) {
       r$inputs[[id]] <- input$protocol
 
       if (input$protocol != "Create New Protocol") {
-
         r[[id]] <- purrr::keep(
           r$default_snapshot$protocols,
           ~ .x$name == input$protocol
@@ -145,15 +189,27 @@ mod_protocol_server <- function(id, r) {
         end_time <- r[[id]]$end_time
         end_time_unit <- r[[id]]$end_time_unit
 
-        if(!is.null(end_time)){
-          r$inputs[[paste0(id, "_end_time")]] <- lubridate::duration(end_time, osp_to_lubridate(end_time_unit)) / lubridate::duration(1, "hours")
+        if (!is.null(end_time)) {
+          r$inputs[[paste0(id, "_end_time")]] <- lubridate::duration(
+            end_time,
+            osp_to_lubridate(end_time_unit)
+          ) /
+            lubridate::duration(1, "hours")
           #TODO support advanced protocol to define end_time
         }
       } else {
+        # Clear the protocol object when "Create New Protocol" is selected
+        # This ensures buttons are disabled until all custom inputs are ready
+        r[[id]] <- NULL
+        
         req(input$dose)
         req(input$dose_unit)
         req(input$protocol_type)
         req(input$protocol_interval)
+        req(input$start_time)
+        req(input$start_time_unit)
+        req(input$end_time)
+        req(input$end_time_unit)
 
         if (input$protocol_type == "oral") {
           extra_args <- list(
@@ -167,7 +223,12 @@ mod_protocol_server <- function(id, r) {
           )
         }
 
-        r$inputs[[paste0(id, "_end_time")]] <- input$duration * 24 # transforms days in hours
+        # Convert end_time to hours for simulation
+        r$inputs[[paste0(id, "_end_time")]] <- lubridate::duration(
+          input$end_time,
+          osp_to_lubridate(input$end_time_unit)
+        ) /
+          lubridate::duration(1, "hours")
 
         r[[id]] <- rlang::inject(
           cts::create_protocol(
@@ -176,8 +237,10 @@ mod_protocol_server <- function(id, r) {
             interval = input$protocol_interval,
             dose = input$dose,
             dose_unit = input$dose_unit,
-            end_time = r$inputs$end_time,
-            end_time_unit = "h",
+            start_time = input$start_time,
+            start_time_unit = input$start_time_unit,
+            end_time = input$end_time,
+            end_time_unit = input$end_time_unit,
             ... = !!!extra_args
           )
         )
@@ -192,12 +255,14 @@ mod_protocol_server <- function(id, r) {
 ## To be copied in the server
 # mod_protocol_server("protocol_1")
 
-osp_to_lubridate <- function(time_unit){
-  dplyr::case_match(time_unit,
-                    "s" ~ "seconds",
-                    "min" ~ "minutes",
-                    "h" ~ "hours",
-                    "day(s)" ~ "days",
-                    "week(s)" ~ "weeks",
-                    "year(s)" ~ "years")
+osp_to_lubridate <- function(time_unit) {
+  dplyr::case_match(
+    time_unit,
+    "s" ~ "seconds",
+    "min" ~ "minutes",
+    "h" ~ "hours",
+    "day(s)" ~ "days",
+    "week(s)" ~ "weeks",
+    "year(s)" ~ "years"
+  )
 }

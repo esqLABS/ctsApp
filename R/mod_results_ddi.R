@@ -14,10 +14,6 @@ mod_results_ddi_ui <- function(id) {
     uiOutput(ns("value_boxes")),
     card(
       fill = TRUE,
-      card_header(
-        class = "d-flex justify-content-between",
-        "DDI Comparison"
-      ),
       card_body(
         plotlyOutput(ns("plot"))
       )
@@ -28,8 +24,7 @@ mod_results_ddi_ui <- function(id) {
 #' mod_results_ddi Server Functions
 #'
 #' @noRd
-#' @importFrom ggplot2 ggplot aes labs guides geom_line geom_ribbon
-#' @importFrom plotly plotlyOutput renderPlotly ggplotly layout config
+#' @importFrom plotly plotlyOutput renderPlotly plot_ly add_ribbons add_lines layout config
 mod_results_ddi_server <- function(id, r) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
@@ -80,51 +75,111 @@ mod_results_ddi_server <- function(id, r) {
           .groups = "drop"
         )
 
-      # Create a column with the hover text
-      summary_data$hovertext <- paste0(
-        "<b>",
-        summary_data$sim,
-        "</b><br>",
-        "Time: ",
-        round(summary_data$time, 2),
-        " h<br>",
-        "Mean: ",
-        round(summary_data$mean_conc, 2),
-        " µg/L<br>",
-        "Range: [",
-        round(summary_data$min_conc, 2),
-        " - ",
-        round(summary_data$max_conc, 2),
-        "] µg/L"
-      )
+      # Modern color palette for comparison
+      comparison_colors <- c("#f43d3dff", "#667eea")
 
-      p <- ggplot2::ggplot(
-        summary_data,
-        aes(x = time, y = mean_conc, group = sim)
-      ) +
-        ggplot2::geom_line(aes(color = sim, text = hovertext)) +
-        ggplot2::geom_ribbon(
-          aes(ymin = min_conc, ymax = max_conc, fill = sim, text = hovertext),
-          alpha = 0.6
-        ) +
-        ggplot2::labs(
-          title = glue::glue("Concentration Time Profile of {r$inputs$victim}"),
-          fill = NULL,
-          y = "Concentration [µg/L]",
-          x = "Time [h]"
-        ) +
-        ggplot2::guides(color = FALSE)
+      # Create named color vector
+      sims <- unique(summary_data$sim)
+      color_map <- setNames(comparison_colors, sims)
 
-      # Create plotly object with tooltip using the text aesthetic
-      plotly::ggplotly(p, tooltip = "text") |>
+      # Create plotly object directly
+      p <- plotly::plot_ly()
+
+      # Add traces for each simulation
+      for (s in sims) {
+        sim_data <- summary_data[summary_data$sim == s, ]
+        
+        # Add lower bound of ribbon first
+        p <- p |>
+          plotly::add_trace(
+            data = sim_data,
+            x = ~time,
+            y = ~min_conc,
+            type = 'scatter',
+            mode = 'lines',
+            line = list(width = 0),
+            showlegend = FALSE,
+            hoverinfo = 'none'
+          )
+        
+        # Add upper bound of ribbon (fills to previous trace)
+        p <- p |>
+          plotly::add_trace(
+            data = sim_data,
+            x = ~time,
+            y = ~max_conc,
+            type = 'scatter',
+            mode = 'lines',
+            line = list(width = 0),
+            fillcolor = paste0(substr(color_map[s], 1, 7), "66"),  # Add transparency
+            fill = 'tonexty',
+            showlegend = FALSE,
+            hoverinfo = 'none'
+          )
+        
+        # Add line with custom hovertemplate
+        p <- p |>
+          plotly::add_lines(
+            data = sim_data,
+            x = ~time,
+            y = ~mean_conc,
+            line = list(color = color_map[s], width = 2),
+            name = s,
+            showlegend = TRUE,
+            text = ~paste0(round(min_conc, 2), " - ", round(max_conc, 2)),
+            hovertemplate = paste0(
+              "<b>", s, "</b><br>",
+              "%{y:.2f} µg/L<br>",
+              "<span style='font-size:0.9em'>Range: [%{text}]</span>",
+              "<extra></extra>"
+            ),
+            hoverlabel = list(bgcolor = color_map[s])
+          )
+      }
+
+      # Apply layout
+      p |>
         plotly::layout(
-          hovermode = "closest",
+          title = list(
+            text = glue::glue(
+              "Concentration Time Profile of {r$inputs$victim}"
+            ),
+            font = list(
+              size = 15,
+              family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif"
+            )
+          ),
+          hovermode = "x unified",
+          plot_bgcolor = "#ffffff",
+          paper_bgcolor = "#ffffff",
+          font = list(
+            family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+            size = 13,
+            color = "#2d3748"
+          ),
+          xaxis = list(
+            title = list(text = "Time [h]", font = list(size = 12)),
+            gridcolor = "#f7fafc",
+            gridwidth = 1,
+            zerolinecolor = "#e2e8f0",
+            zerolinewidth = 2
+          ),
+          yaxis = list(
+            title = list(text = "Concentration [µg/L]", font = list(size = 12)),
+            gridcolor = "#f7fafc",
+            gridwidth = 1,
+            zerolinecolor = "#e2e8f0",
+            zerolinewidth = 2
+          ),
           legend = list(
-            orientation = "h", # horizontal legend
-            xanchor = "center", # use center of legend as anchor
-            x = 0.5, # position at center of x-axis
-            y = -0.15, # position below the plot
-            yanchor = "top" # use top of legend as anchor
+            orientation = "h",
+            xanchor = "center",
+            x = 0.5,
+            y = -0.15,
+            yanchor = "top",
+            bgcolor = "rgba(255,255,255,0.9)",
+            bordercolor = "#e2e8f0",
+            borderwidth = 1
           )
         ) |>
         plotly::config(
@@ -151,32 +206,32 @@ mod_results_ddi_server <- function(id, r) {
       pk_data_single <- r$results$pk_results$`Single Simulation`
 
       auc_ddi <- pk_data_ddi |>
-        dplyr::filter(Parameter == "AUC_tEnd") |>
+        dplyr::filter(Parameter == "AUC_tDLast_minus_1_tDLast") |>
         dplyr::pull(r$inputs$victim) |>
         unlist()
 
       auc_single <- pk_data_single |>
-        dplyr::filter(Parameter == "AUC_tEnd") |>
+        dplyr::filter(Parameter == "AUC_tDLast_minus_1_tDLast") |>
         dplyr::pull(r$inputs$victim) |>
         unlist()
 
       cmax_ddi <- pk_data_ddi |>
-        dplyr::filter(Parameter == "C_max") |>
+        dplyr::filter(Parameter == "C_max_tDLast_tEnd") |>
         dplyr::pull(r$inputs$victim) |>
         unlist()
 
       cmax_single <- pk_data_single |>
-        dplyr::filter(Parameter == "C_max") |>
+        dplyr::filter(Parameter == "C_max_tDLast_tEnd") |>
         dplyr::pull(r$inputs$victim) |>
         unlist()
 
       tmax_ddi <- pk_data_ddi |>
-        dplyr::filter(Parameter == "t_max") |>
+        dplyr::filter(Parameter == "t_max_tDLast_tEnd") |>
         dplyr::pull(r$inputs$victim) |>
         unlist()
 
       tmax_single <- pk_data_single |>
-        dplyr::filter(Parameter == "t_max") |>
+        dplyr::filter(Parameter == "t_max_tDLast_tEnd") |>
         dplyr::pull(r$inputs$victim) |>
         unlist()
 

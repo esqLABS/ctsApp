@@ -30,8 +30,12 @@ mod_results_ui <- function(id) {
                     mod_results_pk_ui(ns("pk"))
                 ),
                 nav_panel(
-                    title = "DDI Analysis",
+                    title = "PK-DDI Analysis",
                     mod_results_ddi_ui(ns("ddi"))
+                ),
+                nav_panel(
+                    title = "PK-PD Analysis",
+                    mod_results_pd_ui(ns("pd"))
                 )
             )
         )

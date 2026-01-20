@@ -5,11 +5,11 @@ output: github_document
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 ```{r, include = FALSE}
-  knitr::opts_chunk$set(
-    collapse = TRUE,
-    comment = "#>",
-    fig.path = "man/figures/README-",
-    out.width = "100%"
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
 )
 ```
 
@@ -19,42 +19,30 @@ output: github_document
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
+The `{ctsApp}` package provides a graphical user interface (Shiny app) for the `{cts}` (Contraceptives DDI Trial Simulation Platform) package. It offers an intuitive web-based interface to design and simulate drug-drug interactions (DDI) involving contraceptive drugs using physiologically based pharmacokinetic (PBPK) models.
+
 ## Installation
 
-You can install the development version of `{ctsApp}` like so:
+You can install the development version of `{ctsApp}` from [GitHub](https://github.com/esqLABS/cstApp) with:
 
-```{r}
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+```{r, eval = FALSE}
+# install.packages("pak")
+pak::pak("esqLABS/cstApp")
 ```
+
 
 ## Run
 
-You can launch the application by running:
+You can launch the Shiny application by running:
 
 ```{r, eval = FALSE}
 ctsApp::run_app()
 ```
 
-## About
+This will open the application in your default web browser, providing an interactive interface to:
 
-You are reading the doc about version : `r golem::pkg_version()`
-
-This README has been compiled on the
-
-```{r}
-Sys.time()
-```
-
-Here are the tests results and package coverage:
-
-```{r, error = TRUE}
-devtools::check(quiet = TRUE)
-```
-
-```{r echo = FALSE}
-unloadNamespace("ctsApp")
-```
-
-```{r, error = TRUE}
-covr::package_coverage()
-```
+- Import and explore compound models from the OSP model library
+- Design DDI simulations between compounds
+- Configure dosing protocols and individual characteristics
+- Run simulations and analyze results with built-in plots and tables
+- Export simulation results for further analysis in PK-Sim

@@ -71,12 +71,19 @@ mod_simulation_params_server <- function(id, r) {
 
         # Calculate end time based on protocol end times if needed
         observe({
+            # Check if protocol end times are available
+            req(r$inputs$protocol_victim_end_time)
+            req(r$inputs$protocol_perpetrator_end_time)
+            
             # Get the maximum protocol end time
             max_end_time <- max(
                 r$inputs$protocol_victim_end_time,
                 r$inputs$protocol_perpetrator_end_time,
                 na.rm = TRUE
             )
+            
+            # Validate that we have a valid end time
+            req(is.finite(max_end_time))
             req(max_end_time > 0)
 
             suggested_end_time <- 1.1 * max_end_time
