@@ -1,8 +1,10 @@
 Package: ctsApp
 Title: A Shiny app to interact with the cts package
 Version: 0.2.0
-Authors@R:
-    person("Felix", "MIL", , "felix.mil@esqlabs.com", role = c("aut", "cre"))
+Authors@R: c(
+    person("Felix", "MIL", , "felix.mil@esqlabs.com", role = c("aut", "cre")),
+    person("Sia", "Mirza", ,"siavash.mirzaee@esqlabs.com", role = c("aut","ctb"))
+)
 Description: The ctsApp provides a graphical user interface to work with
     the cts framework.
 License: MIT + file LICENSE
