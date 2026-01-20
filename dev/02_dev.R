@@ -18,7 +18,7 @@
 ## install.packages('attachment') # if needed.
 attachment::att_amend_desc()
 
-`## Add modules ----
+## Add modules ----
 ## Create a module infrastructure in R/
 golem::add_module(name = "victim", with_test = TRUE) # Name of the module
 golem::add_module(name = "individual", with_test = TRUE) # Name of the module
