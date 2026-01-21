@@ -976,7 +976,7 @@
     "cts": {
       "Package": "cts",
       "Version": "1.1.0.9008",
-      "Source": "Local",
+      "Source": "GitHub",
       "Title": "What the Package Does (One Line, Title Case)",
       "Authors@R": "person(\"First\", \"Last\", , \"first.last@example.com\", role = c(\"aut\", \"cre\"), comment = c(ORCID = \"YOUR-ORCID-ID\"))",
       "Description": "What the package does (one paragraph).",
@@ -1021,8 +1021,11 @@
       "RoxygenNote": "7.3.2",
       "Author": "First Last [aut, cre] (ORCID: YOUR-ORCID-ID)",
       "Maintainer": "First Last <first.last@example.com>",
-      "RemoteType": "local",
-      "RemoteUrl": "/Users/SiavashMirzaee/Documents/0026/CTS/cts",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "cts",
+      "RemoteUsername": "esqLABS",
+      "RemoteRef": "HEAD",
       "Remotes": "ospsuite=Open-Systems-Pharmacology/OSPSuite-R"
     },
     "ctsApp": {

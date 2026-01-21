@@ -2,7 +2,7 @@
 #'
 #' @param input,output,session Internal parameters for {shiny}.
 #'     DO NOT REMOVE.
-#' @import shiny purrr shinipsum cli
+#' @import shiny purrr cli
 #' @noRd
 app_server <- function(input, output, session) {
   # Your application server logic
