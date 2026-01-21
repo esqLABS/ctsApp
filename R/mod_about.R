@@ -59,14 +59,14 @@ mod_about_ui <- function(id) {
             ),
             tags$li(
               tags$a(
-                href = "https://github.com/esqLABS/cstApp",
+                href = "https://github.com/esqLABS/ctsApp",
                 target = "_blank",
                 bsicons::bs_icon("github"), " ctsApp Repository"
               )
             ),
             tags$li(
               tags$a(
-                href = "https://github.com/esqLABS/cstApp/issues",
+                href = "https://github.com/esqLABS/ctsApp/issues",
                 target = "_blank",
                 bsicons::bs_icon("bug"), " Report Issues"
               )

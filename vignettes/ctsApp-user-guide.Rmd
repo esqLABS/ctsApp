@@ -33,7 +33,7 @@ You can install the development version of ctsApp from GitHub:
 
 ```{r, eval = FALSE}
 # install.packages("pak")
-pak::pak("esqLABS/cstApp")
+pak::pak("esqLABS/ctsApp")
 ```
 
 ## Launching the Application

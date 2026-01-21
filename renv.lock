@@ -1036,8 +1036,8 @@
       "Authors@R": "person(\"Felix\", \"MIL\", , \"felix.mil@esqlabs.com\", role = c(\"aut\", \"cre\"))",
       "Description": "The ctsApp provides a graphical user interface to work with the cts framework.",
       "License": "MIT + file LICENSE",
-      "URL": "https://github.com/esqLABS/cstApp",
-      "BugReports": "https://github.com/esqLABS/cstApp/issues",
+      "URL": "https://github.com/esqLABS/ctsApp",
+      "BugReports": "https://github.com/esqLABS/ctsApp/issues",
       "Imports": [
         "bsicons",
         "bslib",

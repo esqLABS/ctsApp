@@ -18,11 +18,11 @@ physiologically based pharmacokinetic (PBPK) models.
 ## Installation
 
 You can install the development version of `{ctsApp}` from
-[GitHub](https://github.com/esqLABS/cstApp) with:
+[GitHub](https://github.com/esqLABS/ctsApp) with:
 
 ``` r
 # install.packages("pak")
-pak::pak("esqLABS/cstApp")
+pak::pak("esqLABS/ctsApp")
 ```
 
 ## Run
