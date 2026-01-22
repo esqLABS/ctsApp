@@ -1,0 +1,236 @@
+---
+title: "ctsApp User Guide"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ctsApp User Guide}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+
+The **ctsApp** package provides a graphical user interface (Shiny app) for the **cts** (Contraceptives DDI Trial Simulation Platform) package. It offers an intuitive web-based interface to design and simulate drug-drug interactions (DDI) involving contraceptive drugs using physiologically based pharmacokinetic (PBPK) models.
+
+### Key Features
+
+- Import and explore compound models from the OSP (Open Systems Pharmacology) model library
+- Design DDI simulations between victim and perpetrator compounds
+- Configure dosing protocols (oral, IV bolus, IV infusion)
+- Define population parameters and individual characteristics
+- Run simulations and analyze results with interactive plots
+- Export simulation results for further analysis in PK-Sim
+
+## Installation
+
+You can install the development version of ctsApp from GitHub:
+
+```{r, eval = FALSE}
+# install.packages("pak")
+pak::pak("esqLABS/ctsApp")
+```
+
+## Launching the Application
+
+To start the application, run:
+```{r, eval = FALSE}
+ctsApp::run_app()
+```
+
+This will open the application in your default web browser.
+
+## User Interface Overview
+
+The ctsApp interface consists of two main areas:
+
+### Left Sidebar
+
+The sidebar contains all configuration panels organized in collapsible accordion sections:
+
+| Panel | Description |
+|-------|-------------|
+| **Victim** | Configure the victim compound, dosing protocol, and formulation |
+| **Population** | Select population type and configure demographics |
+| **Perpetrator** | Configure the perpetrator compound, protocol, formulation, and optional EE settings |
+| **Simulation Parameters** | Set simulation duration and resolution |
+
+At the bottom of the sidebar, you'll find the **Run Simulation** and **Export Snapshot** buttons.
+
+### Main Content Area
+
+The main area contains three tabs:
+
+| Tab | Description |
+|-----|-------------|
+| **Experiment Design** | Summary of all configured parameters with demographic visualizations |
+| **Results** | Simulation results with PK profiles, DDI analysis, and PK-PD analysis |
+| **About** | Information about the application |
+
+## Workflow Guide
+
+### Step 1: Configure Victim Compound
+
+In the **Victim** accordion panel:
+
+1. **Select Compound**: Choose the victim compound from the dropdown. Available options include:
+   - Drospirenone (default)
+   - Levonorgestrel
+
+2. **Select Protocol**: Choose a predefined dosing protocol or create a new one:
+   - Predefined protocols (e.g., "DRSP_3mg 21 days")
+   - "Create New Protocol" to define custom dosing
+
+3. **Select Formulation**: Choose a formulation type:
+   - Predefined formulations (e.g., "DRSP oral tablet")
+   - "Create New Formulation" for custom formulations
+
+### Step 2: Configure Population
+
+In the **Population** accordion panel:
+
+1. **Select Population**: Choose from available population types (e.g., "Healthy Women")
+
+2. **Number of Individuals**: Set the number of virtual individuals (1-100). Note that higher numbers require more memory and increase simulation time.
+
+3. **Age Range**: Define the age range for the population
+
+4. **Physical Parameters**: Depending on the population, configure either:
+   - BMI range, or
+   - Height and Weight ranges
+
+### Step 3: Configure Perpetrator Compound
+
+In the **Perpetrator** accordion panel:
+
+1. **Select Compound**: Choose the perpetrator compound:
+   - Select from available compounds (e.g., Itraconazole)
+   - "Upload Compound" to import a custom compound snapshot (.json)
+
+2. **Select Protocol**: Choose or create a dosing protocol
+
+3. **Select Formulation**: Choose or create a formulation
+
+4. **Ethinylestradiol (EE) Effects** (Optional): Check "Model Ethinylestradiol (EE) effects" to include EE in the simulation. When enabled, additional protocol and formulation options for EE appear.
+
+### Step 4: Set Simulation Parameters
+
+In the **Simulation Parameters** accordion panel:
+
+1. **Duration**: Set the simulation duration and unit (hours, days, weeks)
+
+2. **Resolution**: Set the number of time points per hour
+
+### Step 5: Run Simulation
+
+Once all parameters are configured:
+
+1. The **Run Simulation** button becomes enabled (it remains disabled until all required inputs are valid)
+
+2. Click **Run Simulation** to execute the DDI simulation
+
+3. The simulation creates two scenarios:
+   - **Victim Simulation**: Victim compound alone (+ EE if enabled)
+   - **DDI Simulation**: Victim + Perpetrator (+ EE if enabled)
+
+### Step 6: Analyze Results
+
+After the simulation completes, navigate to the **Results** tab to view:
+
+#### Pharmacokinetics Tab
+
+- Concentration-time profile for the victim compound (with and without perpetrator)
+- Concentration-time profile for perpetrator (if toggle is enabled)
+- Interactive Plotly charts with zoom and pan capabilities
+
+#### PK-DDI Analysis Tab
+
+- DDI ratio calculations
+- Comparison of PK parameters (AUC, Cmax, etc.) between scenarios
+- Visual representation of drug interaction effects
+
+#### PK-PD Analysis Tab
+
+- Pharmacokinetic-pharmacodynamic analysis (when applicable)
+
+## Advanced Features
+
+### Uploading Custom Compound Snapshots
+
+For the perpetrator compound, you can upload custom compound models:
+
+1. Select "Upload Compound" from the compound dropdown
+2. Click "Browse..." to select a JSON snapshot file
+3. The snapshot can contain:
+   - Compound definitions
+   - Formulations
+   - Protocols
+4. Imported items are automatically added to the available options
+
+### Creating Custom Protocols
+
+When "Create New Protocol" is selected:
+
+| Parameter | Description |
+|-----------|-------------|
+| **Dose** | Dose amount and unit (mg, g) |
+| **Type** | Oral, Intravenous Bolus, or Intravenous |
+| **Interval** | Single dose, once/twice/thrice/four times daily |
+| **Start Time** | When dosing begins |
+| **End Time** | When dosing ends |
+
+For **oral** administration:
+- Water Volume/Body Weight: Volume of water co-administered
+
+For **IV** administration:
+- Infusion Time: Duration of infusion
+
+### Creating Custom Formulations
+
+When "Create New Formulation" is selected, choose from:
+
+| Type | Description |
+|------|-------------|
+| **Dissolved** | Immediate release, fully dissolved |
+| **Weibull** | Weibull dissolution kinetics |
+| **Lint80** | Linear dissolution to 80% |
+| **Particle** | Particle-based dissolution (mono/polydisperse) |
+| **Table** | Custom dissolution profile via time-fraction table |
+| **Zero Order** | Constant release rate |
+| **First Order** | Exponential release kinetics |
+
+Each formulation type has specific parameters to configure.
+
+## Exporting Results
+
+### Export DDI Snapshot
+
+Click **Export Snapshot** to download a JSON file containing:
+
+- All compound configurations
+- Protocol definitions
+- Formulation settings
+- Population parameters
+- Simulation settings
+
+This snapshot can be:
+- Imported into PK-Sim for further analysis
+- Shared with collaborators
+- Used as a starting point for future simulations
+
+## Troubleshooting
+
+### Buttons are disabled
+
+The **Run Simulation** and **Export Snapshot** buttons are disabled when:
+
+- Required inputs are missing or invalid
+- Population parameters are out of valid ranges
+- Custom protocol/formulation inputs are incomplete
+
+Check all accordion panels to ensure all required fields are properly configured.

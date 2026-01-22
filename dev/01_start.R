@@ -28,7 +28,7 @@ golem::fill_desc(
     email = "felix.mil@esqlabs.com", # Your email
     role = c("aut", "cre") # Your role (here author/creator)
   ),
-  repo_url = "https://github.com/esqLABS/cstApp", # The URL of the GitHub repo (optional),
+  repo_url = "https://github.com/esqLABS/ctsApp", # The URL of the GitHub repo (optional),
   pkg_version = "0.0.0.9000", # The version of the package containing the app
   set_options = TRUE # Set the global golem options
 )
@@ -65,7 +65,7 @@ usethis::use_git()
 ## Sets the remote associated with 'name' to 'url'
 usethis::use_git_remote(
   name = "origin",
-  url = "https://github.com/esqLABS/cstApp"
+  url = "https://github.com/esqLABS/ctsApp"
 )
 
 # You're now set! ----

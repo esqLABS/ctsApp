@@ -23,11 +23,11 @@ The `{ctsApp}` package provides a graphical user interface (Shiny app) for the `
 
 ## Installation
 
-You can install the development version of `{ctsApp}` from [GitHub](https://github.com/esqLABS/cstApp) with:
+You can install the development version of `{ctsApp}` from [GitHub](https://github.com/esqLABS/ctsApp) with:
 
 ```{r, eval = FALSE}
 # install.packages("pak")
-pak::pak("esqLABS/cstApp")
+pak::pak("esqLABS/ctsApp")
 ```
 
 
