@@ -96,7 +96,7 @@ In the **Population** accordion panel:
 
 1. **Select Population**: Choose from available population types (e.g., "Healthy Women")
 
-2. **Number of Individuals**: Set the number of virtual individuals (1-100)
+2. **Number of Individuals**: Set the number of virtual individuals (1-100). Note that higher numbers require more memory and increase simulation time.
 
 3. **Age Range**: Define the age range for the population
 
@@ -135,7 +135,7 @@ Once all parameters are configured:
 2. Click **Run Simulation** to execute the DDI simulation
 
 3. The simulation creates two scenarios:
-   - **Single Simulation**: Victim compound alone
+   - **Victim Simulation**: Victim compound alone (+ EE if enabled)
    - **DDI Simulation**: Victim + Perpetrator (+ EE if enabled)
 
 ### Step 6: Analyze Results
@@ -144,9 +144,9 @@ After the simulation completes, navigate to the **Results** tab to view:
 
 #### Pharmacokinetics Tab
 
-- Time-concentration profiles for all compounds
+- Concentration-time profile for the victim compound (with and without perpetrator)
+- Concentration-time profile for perpetrator (if toggle is enabled)
 - Interactive Plotly charts with zoom and pan capabilities
-- Comparison between single and DDI simulations
 
 #### PK-DDI Analysis Tab
 

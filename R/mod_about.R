@@ -86,7 +86,7 @@ mod_about_ui <- function(id) {
         card_header(tags$h5(bsicons::bs_icon("people"), " Credits")),
         card_body(
           tags$p(
-            "Developed by ", tags$strong("esqLABS GmbH")
+            "Developed by ", tags$strong("ESQlabs GmbH")
           ),
           tags$p(
             tags$strong("Authors:"),
