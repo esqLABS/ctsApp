@@ -42,6 +42,6 @@ Encoding: UTF-8
 Language: en-US
 LazyData: true
 RoxygenNote: 7.3.3
-Remotes:
-    esqLABS/cts,
-    ospsuite=Open-Systems-Pharmacology/OSPSuite-R
+Remotes: 
+    esqLABS/cts@*release,
+    ospsuite=Open-Systems-Pharmacology/OSPSuite-R@*release
