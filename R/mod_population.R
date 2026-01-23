@@ -21,8 +21,8 @@ mod_population_ui <- function(id) {
       ns("age"),
       "Age",
       value = c(20, 60),
-      min = 0,
-      max = 100
+      min = 15,
+      max = 75
     ),
     uiOutput(ns("physical_params"))
   )
@@ -45,6 +45,21 @@ mod_population_server <- function(id, r) {
         choices = r$default_snapshot$get_names("populations"),
         selected = "Healthy Women"
       )
+    })
+
+    # Auto-correct age values to valid range (15-75)
+    observeEvent(input$age, {
+      req(length(input$age) == 2)
+      age_min <- max(15, min(input$age[1], 75))
+      age_max <- max(15, min(input$age[2], 75))
+
+      if (!is.na(input$age[1]) && !is.na(input$age[2]) &&
+          (age_min != input$age[1] || age_max != input$age[2])) {
+        shinyWidgets::updateNumericRangeInput(
+          session, "age",
+          value = c(age_min, age_max)
+        )
+      }
     })
 
     output$physical_params <- renderUI({
@@ -116,8 +131,8 @@ mod_population_server <- function(id, r) {
           is.na(input$age[1]) ||
           is.na(input$age[2]) ||
           input$age[1] >= input$age[2] ||
-          input$age[1] < 0 ||
-          input$age[2] > 100
+          input$age[1] < 15 ||
+          input$age[2] > 75
       ) {
         r$population_characteristics <- NULL
         return()
