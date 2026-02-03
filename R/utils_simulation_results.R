@@ -24,7 +24,7 @@ inputs_are_default <- function(r) {
   default_population <- "European (ICRP, 2002)"
   default_duration_value <- 24
   default_duration_unit <- "h"
-  default_resolution <- 4
+  default_resolution <- 1
   default_model_ee <- FALSE
 
   # Check each input against defaults

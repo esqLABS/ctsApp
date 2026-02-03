@@ -43,7 +43,7 @@ mod_simulation_params_ui <- function(id) {
                 numericInput(
                     ns("resolution"),
                     "Resolution (pts/h)",
-                    value = 4,
+                    value = 1,
                     min = 1
                 )
             )

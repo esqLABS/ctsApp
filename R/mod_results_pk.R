@@ -50,7 +50,7 @@ mod_results_pk_server <- function(id, r) {
         dplyr::transmute(
           individual = IndividualId,
           time = lubridate::duration(Time, "minutes") /
-            lubridate::duration(1, "hours"), # Time in hours
+            lubridate::duration(1, "days"), # Time in days
           molecule = stringr::str_extract(
             paths,
             pattern = "(?<=VenousBlood\\|)[^\\|]*"
@@ -160,7 +160,7 @@ mod_results_pk_server <- function(id, r) {
             color = "#2d3748"
           ),
           xaxis = list(
-            title = list(text = "Time [h]", font = list(size = 12)),
+            title = list(text = "Time [days]", font = list(size = 12)),
             gridcolor = "#f7fafc",
             gridwidth = 1,
             zerolinecolor = "#e2e8f0",
