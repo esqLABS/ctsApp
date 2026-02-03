@@ -131,7 +131,7 @@ mod_results_pk_server <- function(id, r) {
             text = ~paste0(round(min_conc, 2), " - ", round(max_conc, 2)),
             hovertemplate = paste0(
               "<b>", mol, "</b><br>",
-              "%{y:.2f} µg/L<br>",
+              "Mean: %{y:.2f} µg/L<br>",
               "<span style='font-size:0.9em'>Range: [%{text}]</span>",
               "<extra></extra>"
             ),
@@ -274,7 +274,7 @@ mod_results_pk_server <- function(id, r) {
 quantile_value_box <- function(title, quantiles, icon = NULL) {
   bslib::value_box(
     title,
-    quantiles[2],
-    paste0("[", quantiles[2], " - ", quantiles[3], "]")
+    paste0("Median: ", quantiles[2]),
+    paste0("[", quantiles[1], " - ", quantiles[3], "]")
   )
 }

@@ -129,7 +129,7 @@ mod_results_ddi_server <- function(id, r) {
             text = ~paste0(round(min_conc, 2), " - ", round(max_conc, 2)),
             hovertemplate = paste0(
               "<b>", s, "</b><br>",
-              "%{y:.2f} µg/L<br>",
+              "Mean: %{y:.2f} µg/L<br>",
               "<span style='font-size:0.9em'>Range: [%{text}]</span>",
               "<extra></extra>"
             ),
