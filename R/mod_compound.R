@@ -7,7 +7,7 @@
 #' @noRd
 #'
 #' @importFrom shiny NS tagList
-#' @import shinyWidgets
+#' @importFrom shinyWidgets numericRangeInput updateNumericRangeInput
 mod_compound_ui <- function(id) {
   ns <- NS(id)
   tagList(

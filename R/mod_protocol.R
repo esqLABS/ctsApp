@@ -230,9 +230,12 @@ mod_protocol_server <- function(id, r) {
         ) /
           lubridate::duration(1, "hours")
 
+        # Create unique name based on module id (victim/perpetrator)
+        protocol_name <- paste0("Custom Protocol (", tools::toTitleCase(gsub("protocol_", "", id)), ")")
+
         r[[id]] <- rlang::inject(
           cts::create_protocol(
-            name = "New Custom Protocol",
+            name = protocol_name,
             type = input$protocol_type,
             interval = input$protocol_interval,
             dose = input$dose,
