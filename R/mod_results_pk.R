@@ -207,35 +207,42 @@ mod_results_pk_server <- function(id, r) {
 
       vb_data <- r$results$pk_results$`DDI Simulation`
 
-      victim_cmax <- vb_data |>
-        dplyr::filter(Parameter == "C_max_tDLast_tEnd") |>
-        dplyr::pull(r$inputs$victim) |>
-        unlist()
+      cmax_result <- extract_pk_values(
+        vb_data, "C_max_tDLast_tEnd", "C_max", r$inputs$victim
+      )
 
       victim_molw <- r$results$sim_results$`DDI Simulation` |>
         dplyr::filter(stringr::str_detect(paths, r$inputs$victim)) |>
         dplyr::pull(molWeight) |>
         unique()
 
-      victim_tmax <- vb_data |>
-        dplyr::filter(Parameter == "t_max_tDLast_tEnd") |>
-        dplyr::pull(r$inputs$victim) |>
-        unlist()
+      tmax_result <- extract_pk_values(
+        vb_data, "t_max_tDLast_tEnd", "t_max", r$inputs$victim
+      )
 
-      victim_auc <- vb_data |>
-        dplyr::filter(Parameter == "AUC_tDLast_minus_1_tDLast") |>
-        dplyr::pull(r$inputs$victim) |>
-        unlist()
+      auc_result <- extract_pk_values(
+        vb_data, "AUC_tDLast_minus_1_tDLast", "AUC_tEnd", r$inputs$victim
+      )
 
       victim_cmax <- signif(
-        quantile(victim_cmax * victim_molw, probs = c(0.05, .5, 0.95)),
+        quantile(cmax_result$values * victim_molw, probs = c(0.05, .5, 0.95)),
         4
       ) # µmol/L -> µg/L
-      victim_tmax <- signif(quantile(victim_tmax, probs = c(0.05, .5, 0.95)), 4) # hours
+      victim_tmax <- signif(
+        quantile(tmax_result$values, probs = c(0.05, .5, 0.95)),
+        4
+      ) # hours
       victim_auc <- signif(
-        quantile(victim_auc * victim_molw / 60, probs = c(0.05, .5, 0.95)),
+        quantile(auc_result$values * victim_molw / 60, probs = c(0.05, .5, 0.95)),
         4
       ) # µmol*min/L -> µg*h/L
+
+      # Dynamic tooltip based on which AUC parameter was used
+      if (auc_result$param_used == "AUC_tDLast_minus_1_tDLast") {
+        auc_tooltip_text <- "Area under the curve between the (last-1) and last application (AUC_tDlast-1_tDlast): The integral of the concentration-time curve during the last dosing interval, representing total drug exposure."
+      } else {
+        auc_tooltip_text <- "Area under the curve from start to end of simulation (AUC_tEnd): Total drug exposure over the entire simulation period. Shown because a single dose protocol has no last dosing interval."
+      }
 
       layout_column_wrap(
         1 / 3,
@@ -256,7 +263,7 @@ mod_results_pk_server <- function(id, r) {
         quantile_value_box(
           tooltip(
             "AUC (µg*h/L)",
-            "Area under the curve between the (last-1) and last application (AUC_tDlast-1_tDlast): The integral of the concentration-time curve during the last dosing interval, representing total drug exposure."
+            auc_tooltip_text
           ),
           victim_auc
         )
@@ -277,4 +284,30 @@ quantile_value_box <- function(title, quantiles, icon = NULL) {
     paste0("Median: ", quantiles[2]),
     paste0("[", quantiles[1], " - ", quantiles[3], "]")
   )
+}
+
+#' Extract PK parameter values with fallback for single-dose scenarios
+#'
+#' @param pk_data A tibble of PK analysis results (pivoted)
+#' @param param Primary parameter name to extract
+#' @param fallback_param Fallback parameter name if primary returns no valid data
+#' @param compound Column name for the compound to pull values from
+#' @return A list with `values` (numeric vector) and `param_used` (character)
+#' @noRd
+extract_pk_values <- function(pk_data, param, fallback_param, compound) {
+  vals <- pk_data |>
+    dplyr::filter(Parameter == param) |>
+    dplyr::pull(compound) |>
+    unlist()
+
+  if (length(vals) > 0 && !all(is.na(vals) | is.nan(vals))) {
+    return(list(values = vals, param_used = param))
+  }
+
+  vals <- pk_data |>
+    dplyr::filter(Parameter == fallback_param) |>
+    dplyr::pull(compound) |>
+    unlist()
+
+  return(list(values = vals, param_used = fallback_param))
 }

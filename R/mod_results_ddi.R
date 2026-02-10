@@ -205,51 +205,46 @@ mod_results_ddi_server <- function(id, r) {
       pk_data_ddi <- r$results$pk_results$`DDI Simulation`
       pk_data_single <- r$results$pk_results$`Single Simulation`
 
-      auc_ddi <- pk_data_ddi |>
-        dplyr::filter(Parameter == "AUC_tDLast_minus_1_tDLast") |>
-        dplyr::pull(r$inputs$victim) |>
-        unlist()
+      auc_ddi_result <- extract_pk_values(
+        pk_data_ddi, "AUC_tDLast_minus_1_tDLast", "AUC_tEnd", r$inputs$victim
+      )
+      auc_single_result <- extract_pk_values(
+        pk_data_single, "AUC_tDLast_minus_1_tDLast", "AUC_tEnd", r$inputs$victim
+      )
 
-      auc_single <- pk_data_single |>
-        dplyr::filter(Parameter == "AUC_tDLast_minus_1_tDLast") |>
-        dplyr::pull(r$inputs$victim) |>
-        unlist()
+      cmax_ddi_result <- extract_pk_values(
+        pk_data_ddi, "C_max_tDLast_tEnd", "C_max", r$inputs$victim
+      )
+      cmax_single_result <- extract_pk_values(
+        pk_data_single, "C_max_tDLast_tEnd", "C_max", r$inputs$victim
+      )
 
-      cmax_ddi <- pk_data_ddi |>
-        dplyr::filter(Parameter == "C_max_tDLast_tEnd") |>
-        dplyr::pull(r$inputs$victim) |>
-        unlist()
-
-      cmax_single <- pk_data_single |>
-        dplyr::filter(Parameter == "C_max_tDLast_tEnd") |>
-        dplyr::pull(r$inputs$victim) |>
-        unlist()
-
-      tmax_ddi <- pk_data_ddi |>
-        dplyr::filter(Parameter == "t_max_tDLast_tEnd") |>
-        dplyr::pull(r$inputs$victim) |>
-        unlist()
-
-      tmax_single <- pk_data_single |>
-        dplyr::filter(Parameter == "t_max_tDLast_tEnd") |>
-        dplyr::pull(r$inputs$victim) |>
-        unlist()
-
-      victim_molw <- r$results$sim_results$`DDI Simulation` |>
-        dplyr::filter(stringr::str_detect(paths, r$inputs$victim)) |>
-        dplyr::pull(molWeight) |>
-        unique()
+      tmax_ddi_result <- extract_pk_values(
+        pk_data_ddi, "t_max_tDLast_tEnd", "t_max", r$inputs$victim
+      )
+      tmax_single_result <- extract_pk_values(
+        pk_data_single, "t_max_tDLast_tEnd", "t_max", r$inputs$victim
+      )
 
       auc_ratio <- signif(
-        quantile(auc_ddi / auc_single, probs = c(0.05, .5, 0.95)),
+        quantile(
+          auc_ddi_result$values / auc_single_result$values,
+          probs = c(0.05, .5, 0.95), na.rm = TRUE
+        ),
         4
       )
       cmax_ratio <- signif(
-        quantile(cmax_ddi / cmax_single, probs = c(0.05, .5, 0.95)),
+        quantile(
+          cmax_ddi_result$values / cmax_single_result$values,
+          probs = c(0.05, .5, 0.95), na.rm = TRUE
+        ),
         4
       )
       tmax_ratio <- signif(
-        quantile(tmax_ddi / tmax_single, probs = c(0.05, .5, 0.95)),
+        quantile(
+          tmax_ddi_result$values / tmax_single_result$values,
+          probs = c(0.05, .5, 0.95), na.rm = TRUE
+        ),
         4
       )
 
