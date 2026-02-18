@@ -98,10 +98,11 @@ mod_results_ddi_server <- function(id, r) {
             type = 'scatter',
             mode = 'lines',
             line = list(width = 0),
+            legendgroup = s,
             showlegend = FALSE,
             hoverinfo = 'none'
           )
-        
+
         # Add upper bound of ribbon (fills to previous trace)
         p <- p |>
           plotly::add_trace(
@@ -113,10 +114,11 @@ mod_results_ddi_server <- function(id, r) {
             line = list(width = 0),
             fillcolor = paste0(substr(color_map[s], 1, 7), "66"),  # Add transparency
             fill = 'tonexty',
+            legendgroup = s,
             showlegend = FALSE,
             hoverinfo = 'none'
           )
-        
+
         # Add line with custom hovertemplate
         p <- p |>
           plotly::add_lines(
@@ -125,6 +127,7 @@ mod_results_ddi_server <- function(id, r) {
             y = ~mean_conc,
             line = list(color = color_map[s], width = 2),
             name = s,
+            legendgroup = s,
             showlegend = TRUE,
             text = ~paste0(round(min_conc, 2), " - ", round(max_conc, 2)),
             hovertemplate = paste0(
@@ -249,7 +252,7 @@ mod_results_ddi_server <- function(id, r) {
       )
 
       layout_column_wrap(
-        1 / 3,
+        width = 1 / 3,
         quantile_value_box("AUC ratio", auc_ratio),
         quantile_value_box("Cmax ratio", cmax_ratio),
         quantile_value_box("Tmax ratio", tmax_ratio)
