@@ -100,10 +100,11 @@ mod_results_pk_server <- function(id, r) {
             type = 'scatter',
             mode = 'lines',
             line = list(width = 0),
+            legendgroup = mol,
             showlegend = FALSE,
             hoverinfo = 'none'
           )
-        
+
         # Add upper bound of ribbon (fills to previous trace)
         p <- p |>
           plotly::add_trace(
@@ -115,10 +116,11 @@ mod_results_pk_server <- function(id, r) {
             line = list(width = 0),
             fillcolor = paste0(substr(color_map[mol], 1, 7), "66"),  # Add transparency
             fill = 'tonexty',
+            legendgroup = mol,
             showlegend = FALSE,
             hoverinfo = 'none'
           )
-        
+
         # Add line with custom hovertemplate
         p <- p |>
           plotly::add_lines(
@@ -127,6 +129,7 @@ mod_results_pk_server <- function(id, r) {
             y = ~mean_conc,
             line = list(color = color_map[mol], width = 2),
             name = mol,
+            legendgroup = mol,
             showlegend = TRUE,
             text = ~paste0(round(min_conc, 2), " - ", round(max_conc, 2)),
             hovertemplate = paste0(
@@ -245,7 +248,7 @@ mod_results_pk_server <- function(id, r) {
       }
 
       layout_column_wrap(
-        1 / 3,
+        width = 1 / 3,
         quantile_value_box(
           tooltip(
             "Cmax (µg/L)",
