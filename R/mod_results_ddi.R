@@ -15,6 +15,12 @@ mod_results_ddi_ui <- function(id) {
     card(
       fill = TRUE,
       card_body(
+        checkboxInput(
+          ns("show_perpetrator"),
+          "Show Perpetrator",
+          FALSE,
+          width = "auto"
+        ),
         plotlyOutput(ns("plot"))
       )
     )
@@ -50,8 +56,7 @@ mod_results_ddi_server <- function(id, r) {
           )
         ) |>
         dplyr::filter(
-          stringr::str_detect(paths, "Plasma \\(Peripheral Venous Blood\\)"),
-          stringr::str_detect(paths, r$inputs$victim)
+          stringr::str_detect(paths, "Plasma \\(Peripheral Venous Blood\\)")
         ) |>
         dplyr::transmute(
           individual = IndividualId,
@@ -65,9 +70,16 @@ mod_results_ddi_server <- function(id, r) {
           sim = sim
         )
 
-      # Calculate summary statistics for each time point and simulation
+      if (!input$show_perpetrator) {
+        plot_data <- dplyr::filter(
+          plot_data,
+          stringr::str_detect(molecule, r$inputs$perpetrator, negate = TRUE)
+        )
+      }
+
+      # Calculate summary statistics for each time point, simulation, and molecule
       summary_data <- plot_data |>
-        dplyr::group_by(time, sim) |>
+        dplyr::group_by(time, sim, molecule) |>
         dplyr::summarise(
           mean_conc = mean(concentration),
           min_conc = min(concentration),
@@ -75,30 +87,32 @@ mod_results_ddi_server <- function(id, r) {
           .groups = "drop"
         )
 
-      # Modern color palette for comparison
-      comparison_colors <- c("#f43d3dff", "#667eea")
+      # Create a combined label for legend grouping
+      summary_data$trace_label <- paste0(summary_data$molecule, " (", summary_data$sim, ")")
 
-      # Create named color vector
-      sims <- unique(summary_data$sim)
-      color_map <- setNames(comparison_colors, sims)
+      # Modern color palette for traces
+      trace_labels <- unique(summary_data$trace_label)
+      colors <- c("#f43d3dff", "#667eea", "#764ba2", "#f093fb", "#4facfe", "#00f2fe")
+      color_palette <- colors[seq_along(trace_labels)]
+      color_map <- setNames(color_palette, trace_labels)
 
       # Create plotly object directly
       p <- plotly::plot_ly()
 
-      # Add traces for each simulation
-      for (s in sims) {
-        sim_data <- summary_data[summary_data$sim == s, ]
-        
+      # Add traces for each combination
+      for (tl in trace_labels) {
+        trace_data <- summary_data[summary_data$trace_label == tl, ]
+
         # Add lower bound of ribbon first
         p <- p |>
           plotly::add_trace(
-            data = sim_data,
+            data = trace_data,
             x = ~time,
             y = ~min_conc,
             type = 'scatter',
             mode = 'lines',
             line = list(width = 0),
-            legendgroup = s,
+            legendgroup = tl,
             showlegend = FALSE,
             hoverinfo = 'none'
           )
@@ -106,15 +120,15 @@ mod_results_ddi_server <- function(id, r) {
         # Add upper bound of ribbon (fills to previous trace)
         p <- p |>
           plotly::add_trace(
-            data = sim_data,
+            data = trace_data,
             x = ~time,
             y = ~max_conc,
             type = 'scatter',
             mode = 'lines',
             line = list(width = 0),
-            fillcolor = paste0(substr(color_map[s], 1, 7), "66"),  # Add transparency
+            fillcolor = paste0(substr(color_map[tl], 1, 7), "66"),  # Add transparency
             fill = 'tonexty',
-            legendgroup = s,
+            legendgroup = tl,
             showlegend = FALSE,
             hoverinfo = 'none'
           )
@@ -122,21 +136,21 @@ mod_results_ddi_server <- function(id, r) {
         # Add line with custom hovertemplate
         p <- p |>
           plotly::add_lines(
-            data = sim_data,
+            data = trace_data,
             x = ~time,
             y = ~mean_conc,
-            line = list(color = color_map[s], width = 2),
-            name = s,
-            legendgroup = s,
+            line = list(color = color_map[tl], width = 2),
+            name = tl,
+            legendgroup = tl,
             showlegend = TRUE,
             text = ~paste0(round(min_conc, 2), " - ", round(max_conc, 2)),
             hovertemplate = paste0(
-              "<b>", s, "</b><br>",
+              "<b>", tl, "</b><br>",
               "Mean: %{y:.2f} µg/L<br>",
               "<span style='font-size:0.9em'>Range: [%{text}]</span>",
               "<extra></extra>"
             ),
-            hoverlabel = list(bgcolor = color_map[s])
+            hoverlabel = list(bgcolor = color_map[tl])
           )
       }
 
