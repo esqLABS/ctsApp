@@ -18,13 +18,14 @@ mod_results_pk_ui <- function(id) {
       #   "Time Profile",
       # ),
       card_body(
+        fillable = TRUE,
         checkboxInput(
           ns("show_perpetrator"),
           "Show Perpetrator",
           FALSE,
           width = "auto"
         ),
-        plotlyOutput(ns("plot"))
+        plotlyOutput(ns("plot"), height = "100%")
       )
     )
   )
