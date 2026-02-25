@@ -27,6 +27,18 @@ mod_results_pd_server <- function(id, r) {
 
       victim <- r$inputs$victim
 
+      # PD analysis requires repeated dosing to compute steady-state Cavg
+      if (is_single_dose(r$protocol_victim)) {
+        return(
+          div(
+            style = "text-align: center; padding: 2em; color: #6c757d;",
+            "PK-PD analysis is not available for single-dose protocols.",
+            br(),
+            "Pearl Index and Ovulation Rate require repeated dosing to estimate steady-state Cavg."
+          )
+        )
+      }
+
       # Get PD parameters for the victim progestin
       pd_params <- get_pd_params(victim)
       req(pd_params)
@@ -170,4 +182,26 @@ get_pd_params <- function(victim) {
   } else {
     NULL
   }
+}
+
+#' Check if a protocol is single-dose
+#'
+#' @param protocol An R6 Protocol or AdvancedProtocol object
+#' @return TRUE if the protocol is single-dose, FALSE otherwise
+#' @noRd
+is_single_dose <- function(protocol) {
+  if (is.null(protocol)) return(FALSE)
+  if (inherits(protocol, "Protocol") && protocol$interval == "single") {
+    return(TRUE)
+  }
+  if (inherits(protocol, "AdvancedProtocol")) {
+    # Single-dose if all schemas have only 1 repetition
+    all_single <- all(vapply(
+      protocol$schemas,
+      function(s) identical(s$NumberOfRepetitions, 1) || identical(s$NumberOfRepetitions, 1.0),
+      logical(1)
+    ))
+    return(all_single)
+  }
+  FALSE
 }
