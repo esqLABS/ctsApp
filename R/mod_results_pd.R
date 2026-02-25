@@ -76,7 +76,7 @@ mod_results_pd_server <- function(id, r) {
       )
 
       tagList(
-        h5(glue::glue("With {r$inputs$perpetrator} (DDI)")),
+        h5(glue::glue("With {r$inputs$perpetrator} (DDI Simulation)")),
         layout_column_wrap(
           width = 1 / 2,
           quantile_value_box(
@@ -94,7 +94,7 @@ mod_results_pd_server <- function(id, r) {
             or_q_ddi
           )
         ),
-        h5(glue::glue("Without {r$inputs$perpetrator} (Single)")),
+        h5(glue::glue("Without {r$inputs$perpetrator} (Victim Only Simulation)")),
         layout_column_wrap(
           width = 1 / 2,
           quantile_value_box(
