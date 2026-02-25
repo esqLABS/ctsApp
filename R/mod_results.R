@@ -58,6 +58,7 @@ mod_results_server <- function(id, r) {
         # Call the individual module servers
         mod_results_pk_server("pk", r)
         mod_results_ddi_server("ddi", r)
+        mod_results_pd_server("pd", r)
     })
 }
 
