@@ -35,4 +35,4 @@ RUN R -e "install.packages('renv'); \
 RUN R -e "renv::install('.')"
 
 EXPOSE 80
-CMD ["R", "-e", "shiny::runApp(ctsApp::run_app(), host='0.0.0.0', port=80)"]
+CMD ["R", "-e", "options(shiny.host='0.0.0.0', shiny.port=80); ctsApp::run_app()"]
