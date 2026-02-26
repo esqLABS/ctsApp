@@ -232,14 +232,31 @@ mod_simulation_server <- function(id, r) {
 
     # Run simulation button handler
     observeEvent(input$run, {
+      # Show busy notification
+      notif_id <- showNotification(
+        "Running simulation... This may take a moment.",
+        type = "message",
+        duration = NULL,
+        closeButton = FALSE
+      )
+      on.exit(removeNotification(notif_id), add = TRUE)
+
       # Run simulation
       r$ddi <- create_ddi()
       req(r$ddi)
 
       r$inputs$run_btn <- input$run
       r$results$sim_results <- cts::run_ddi(r$ddi)
+
+      showNotification(
+        "Computing PK analysis...",
+        type = "message",
+        duration = 3,
+        closeButton = FALSE
+      )
+
       r$results$pk_results <- cts::run_pk_analysis(r$ddi)
-      
+
       # Automatically save results if toggle is enabled
       save_enabled <- tryCatch(
         get("SAVE_SIMULATION_RESULTS", envir = asNamespace("ctsApp")),

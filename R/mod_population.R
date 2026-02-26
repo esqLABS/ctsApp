@@ -47,8 +47,11 @@ mod_population_server <- function(id, r) {
       )
     })
 
+    # Debounced age input to avoid firing on every slider drag
+    age_debounced <- debounce(reactive({ input$age }), millis = 500)
+
     # Auto-correct age values to valid range (15-75)
-    observeEvent(input$age, {
+    observeEvent(age_debounced(), {
       req(length(input$age) == 2)
       age_min <- max(15, min(input$age[1], 75))
       age_max <- max(15, min(input$age[2], 75))
@@ -121,18 +124,20 @@ mod_population_server <- function(id, r) {
 
     observe({
       req(input$population)
-      req(input$age)
+      req(age_debounced())
       req(input$n)
+
+      age <- age_debounced()
 
       # Clear population characteristics if validation will fail
       # This ensures export button gets disabled when inputs become invalid
       if (
-        length(input$age) != 2 ||
-          is.na(input$age[1]) ||
-          is.na(input$age[2]) ||
-          input$age[1] >= input$age[2] ||
-          input$age[1] < 15 ||
-          input$age[2] > 75
+        length(age) != 2 ||
+          is.na(age[1]) ||
+          is.na(age[2]) ||
+          age[1] >= age[2] ||
+          age[1] < 15 ||
+          age[2] > 75
       ) {
         r$population_characteristics <- NULL
         return()
@@ -148,8 +153,8 @@ mod_population_server <- function(id, r) {
 
       population_data_raw <- population_data$data
 
-      population_data_raw$Settings$Age$Min <- input$age[1]
-      population_data_raw$Settings$Age$Max <- input$age[2]
+      population_data_raw$Settings$Age$Min <- age[1]
+      population_data_raw$Settings$Age$Max <- age[2]
 
       # Update either BMI or Height/Weight based on what's available
       if (!is.null(input$bmi) && length(input$bmi) == 2) {
@@ -241,19 +246,26 @@ mod_population_server <- function(id, r) {
 
       cli::cli_alert_info("Population updated with:")
       cli::cli_li("source pop: {.field {input$population}}")
-      cli::cli_li("age: {.field {input$age}}")
+      cli::cli_li("age: {.field {age}}")
       cli::cli_li(info_text)
     })
 
+    # Debounced population characteristics to avoid repeated generation
+    # during rapid input changes (slider drags, typing)
+    pop_characteristics_debounced <- debounce(
+      reactive({ r$population_characteristics }),
+      millis = 800
+    )
+
     observe({
-      req(r$population_characteristics)
+      req(pop_characteristics_debounced())
 
       # Additional validation before generating population
       # This prevents errors when characteristics are temporarily invalid
       tryCatch(
         {
           generated_pop <- ospsuite::createPopulation(
-            r$population_characteristics
+            pop_characteristics_debounced()
           )
           r$demographics <- tibble::tibble(
             id = generated_pop$population$allIndividualIds,
