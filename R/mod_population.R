@@ -67,25 +67,25 @@ mod_population_server <- function(id, r) {
 
       selected_data <- purrr::keep(
         r$default_snapshot$populations,
-        ~ .x$Name == input$population
+        ~ .x$name == input$population
       )[[1]]
 
       # Check if population uses BMI or Height/Weight
-      if (!is.null(selected_data$Settings$BMI)) {
+      if (!is.null(selected_data$data$Settings$BMI)) {
         # BMI parameters
         shinyWidgets::numericRangeInput(
           ns("bmi"),
           "BMI",
           value = c(
-            selected_data$Settings$BMI$Min %||% 16,
-            selected_data$Settings$BMI$Max %||% 35
+            selected_data$data$Settings$BMI$Min %||% 16,
+            selected_data$data$Settings$BMI$Max %||% 35
           ),
           min = 16,
           max = 35
         )
       } else if (
-        !is.null(selected_data$Settings$Height) &&
-          !is.null(selected_data$Settings$Weight)
+        !is.null(selected_data$data$Settings$Height) &&
+          !is.null(selected_data$data$Settings$Weight)
       ) {
         # Height and Weight parameters
         tagList(
@@ -93,8 +93,8 @@ mod_population_server <- function(id, r) {
             ns("height"),
             "Height (cm)",
             value = c(
-              selected_data$Settings$Height$Min %||% 150,
-              selected_data$Settings$Height$Max %||% 190
+              selected_data$data$Settings$Height$Min %||% 150,
+              selected_data$data$Settings$Height$Max %||% 190
             ),
             min = 120,
             max = 220
@@ -103,8 +103,8 @@ mod_population_server <- function(id, r) {
             ns("weight"),
             "Weight (kg)",
             value = c(
-              selected_data$Settings$Weight$Min %||% 50,
-              selected_data$Settings$Weight$Max %||% 100
+              selected_data$data$Settings$Weight$Min %||% 50,
+              selected_data$data$Settings$Weight$Max %||% 100
             ),
             min = 30,
             max = 150
@@ -140,14 +140,16 @@ mod_population_server <- function(id, r) {
 
       population_data <- purrr::keep(
         r$default_snapshot$populations,
-        ~ .x$Name == input$population
+        ~ .x$name == input$population
       )[[1]]
 
-      population_data$Settings$NumberOfIndividuals <- input$n
-      population_data$Seed <- 42
+      population_data$number_of_individuals <- input$n
+      population_data$seed <- 42
 
-      population_data$Settings$Age$Min <- input$age[1]
-      population_data$Settings$Age$Max <- input$age[2]
+      population_data_raw <- population_data$data
+
+      population_data_raw$Settings$Age$Min <- input$age[1]
+      population_data_raw$Settings$Age$Max <- input$age[2]
 
       # Update either BMI or Height/Weight based on what's available
       if (!is.null(input$bmi) && length(input$bmi) == 2) {
@@ -165,20 +167,20 @@ mod_population_server <- function(id, r) {
           return()
         }
 
-        population_data$Settings$BMI$Min <- input$bmi[1]
-        population_data$Settings$BMI$Max <- input$bmi[2]
+        population_data_raw$Settings$BMI$Min <- input$bmi[1]
+        population_data_raw$Settings$BMI$Max <- input$bmi[2]
 
         info_text <- "bmi: {.field {input$bmi}}"
 
         r$population_characteristics <- ospsuite::createPopulationCharacteristics(
-          species = population_data$Settings$Individual$OriginData$Species,
-          population = population_data$Settings$Individual$OriginData$Population,
+          species = population_data_raw$Settings$Individual$OriginData$Species,
+          population = population_data_raw$Settings$Individual$OriginData$Population,
           numberOfIndividuals = input$n,
           proportionOfFemales = 1,
-          BMIMin = population_data$Settings$BMI$Min,
-          BMIMax = population_data$Settings$BMI$Max,
-          ageMin = population_data$Settings$Age$Min,
-          ageMax = population_data$Settings$Age$Max,
+          BMIMin = population_data_raw$Settings$BMI$Min,
+          BMIMax = population_data_raw$Settings$BMI$Max,
+          ageMin = population_data_raw$Settings$Age$Min,
+          ageMax = population_data_raw$Settings$Age$Max,
           seed = 42
         )
       } else if (
@@ -200,10 +202,10 @@ mod_population_server <- function(id, r) {
           return()
         }
 
-        population_data$Settings$Height$Min <- input$height[1]
-        population_data$Settings$Height$Max <- input$height[2]
-        population_data$Settings$Weight$Min <- input$weight[1]
-        population_data$Settings$Weight$Max <- input$weight[2]
+        population_data_raw$Settings$Height$Min <- input$height[1]
+        population_data_raw$Settings$Height$Max <- input$height[2]
+        population_data_raw$Settings$Weight$Min <- input$weight[1]
+        population_data_raw$Settings$Weight$Max <- input$weight[2]
 
         info_text <-
           c(
@@ -212,18 +214,18 @@ mod_population_server <- function(id, r) {
           )
 
         r$population_characteristics <- ospsuite::createPopulationCharacteristics(
-          species = population_data$Settings$Individual$OriginData$Species,
-          population = population_data$Settings$Individual$OriginData$Population,
+          species = population_data_raw$Settings$Individual$OriginData$Species,
+          population = population_data_raw$Settings$Individual$OriginData$Population,
           numberOfIndividuals = input$n,
           proportionOfFemales = 1,
-          weightMin = population_data$Settings$Weight$Min,
-          weightMax = population_data$Settings$Weight$Max,
-          weightUnit = population_data$Settings$Weight$Unit,
-          heightMin = population_data$Settings$Height$Min,
-          heightMax = population_data$Settings$Height$Max,
-          heightUnit = population_data$Settings$Height$Unit,
-          ageMin = population_data$Settings$Age$Min,
-          ageMax = population_data$Settings$Age$Max,
+          weightMin = population_data_raw$Settings$Weight$Min,
+          weightMax = population_data_raw$Settings$Weight$Max,
+          weightUnit = population_data_raw$Settings$Weight$Unit,
+          heightMin = population_data_raw$Settings$Height$Min,
+          heightMax = population_data_raw$Settings$Height$Max,
+          heightUnit = population_data_raw$Settings$Height$Unit,
+          ageMin = population_data_raw$Settings$Age$Min,
+          ageMax = population_data_raw$Settings$Age$Max,
           seed = 42
         )
       } else {
@@ -235,7 +237,7 @@ mod_population_server <- function(id, r) {
       }
 
       r$inputs$population <- input$population
-      r$population_data <- population_data
+      r$population_data <- osp.snapshots::Population$new(population_data_raw)
 
       cli::cli_alert_info("Population updated with:")
       cli::cli_li("source pop: {.field {input$population}}")

@@ -80,9 +80,14 @@ mod_simulation_server <- function(id, r) {
         ) |>
         cts::set_output_interval(
           start_time = 0,
-          end_time = r$simulation_params$duration_value,
+          end_time = ospsuite::toUnit(
+            quantityOrDimension = "Time",
+            values = r$simulation_params$duration_value,
+            sourceUnit = r$simulation_params$duration_unit,
+            targetUnit = "h"
+          ),
           resolution = r$simulation_params$resolution,
-          unit = r$simulation_params$duration_unit
+          unit = "h"
         )
 
       cts::add_simulation(
@@ -140,9 +145,14 @@ mod_simulation_server <- function(id, r) {
         ) |>
         cts::set_output_interval(
           start_time = 0,
-          end_time = r$simulation_params$duration_value,
+          end_time = ospsuite::toUnit(
+            quantityOrDimension = "Time",
+            values = r$simulation_params$duration_value,
+            sourceUnit = r$simulation_params$duration_unit,
+            targetUnit = "h"
+          ),
           resolution = r$simulation_params$resolution,
-          unit = r$simulation_params$duration_unit
+          unit = "h"
         )
 
       ddi <- cts::add_simulation(
