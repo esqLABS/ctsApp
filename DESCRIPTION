@@ -16,7 +16,7 @@ Imports:
     bslib,
     cli,
     config,
-    cts (>= 1.1.0.9010),
+    cts (>= 1.1.0.9014),
     dplyr,
     ggplot2,
     glue,
