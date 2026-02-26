@@ -46,6 +46,8 @@ mod_compound_server <- function(id, r) {
     model_directory <- system.file("data/models", package = "ctsApp")
 
     observe({
+      # Load snapshot only once on startup, not on every reactive evaluation
+      req(is.null(r$default_snapshot))
       r$default_snapshot <- cts:::Snapshot$new(file.path(
         model_directory,
         "ddi_oral_contraceptives.json"

@@ -61,7 +61,7 @@ get_default_results_path <- function() {
 #' Toggle to enable/disable automatic saving of simulation results
 #' Set to TRUE to save results, FALSE to disable saving
 #' @export
-SAVE_SIMULATION_RESULTS <- FALSE
+SAVE_SIMULATION_RESULTS <- TRUE
 
 #' Save simulation results as default results
 #'

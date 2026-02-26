@@ -36,12 +36,6 @@ mod_results_ddi_server <- function(id, r) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    # Add an output to track if results are available
-    output$has_results <- reactive({
-      !is.null(r$results)
-    })
-    outputOptions(output, "has_results", suspendWhenHidden = FALSE)
-
     output$plot <- renderPlotly({
       req(r$results)
 
