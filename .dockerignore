@@ -1,0 +1,18 @@
+# R / renv
+renv/staging/
+renv/library/
+renv/local/
+renv/python/
+renv/.cache/
+renv/activate.R
+renv/settings.json
+.Rprofile
+.Rhistory
+.RData
+
+# misc
+.git/
+.gitignore
+*.tar.gz
+*.zip
+*.Rproj.user/
