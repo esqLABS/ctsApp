@@ -16,12 +16,13 @@ Imports:
     bslib,
     cli,
     config,
-    cts (>= 1.1.0.9007),
+    cts (>= 1.1.0.9010),
     dplyr,
     ggplot2,
     glue,
     golem,
     lubridate,
+    osp.snapshots,
     ospsuite,
     plotly,
     purrr,
@@ -42,6 +43,7 @@ Encoding: UTF-8
 Language: en-US
 LazyData: true
 RoxygenNote: 7.3.3
-Remotes:  
-    esqLABS/cts@main@*release,
+Remotes: 
+    cts=esqLABS/cts@main@*release,
+    osp.snapshots=esqLABS/osp.snapshots@*release,
     ospsuite=Open-Systems-Pharmacology/OSPSuite-R@*release
