@@ -93,7 +93,9 @@ mod_about_ui <- function(id) {
             tags$br(),
             "Felix MIL (Author, Maintainer)",
             tags$br(),
-            "Sia Mirza (Author, Contributor)"
+            "Sia Mirza (Author, Contributor)",
+            tags$br(),
+            "Diane Lefaudeux (Contributor, Maintainer)"
           ),
           tags$p(
             tags$strong("Version: "),
