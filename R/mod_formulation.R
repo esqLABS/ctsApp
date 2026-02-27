@@ -353,8 +353,8 @@ mod_formulation_server <- function(id, r) {
     # Update formulation dropdown based on selected compound
     observe({
       req(r$default_snapshot)
-      # Create reactive dependency on snapshot_version to update when compounds are uploaded
-      # (snapshot_version is initialized after default_snapshot, so it's safe to read here)
+      # Create reactive dependency: read snapshot_version to trigger updates when compounds are uploaded.
+      # No validation needed - we only need the dependency, not the value itself.
       r$snapshot_version
 
       if (compound_role == "ee") {
