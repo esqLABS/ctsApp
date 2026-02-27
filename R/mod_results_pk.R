@@ -78,7 +78,7 @@ mod_results_pk_server <- function(id, r) {
             paths,
             pattern = "(?<=VenousBlood\\|)[^\\|]*"
           ),
-          concentration = simulationValues * molWeight # concentration in µg/L
+          concentration = simulationValues * molWeight * 1000 # concentration in pg/mL
         )
 
       perpetrator_label <- r$results$perpetrator_name %||% r$inputs$perpetrator
@@ -159,7 +159,7 @@ mod_results_pk_server <- function(id, r) {
             text = ~paste0(signif(min_conc, 3), " - ", signif(max_conc, 3)),
             hovertemplate = paste0(
               "<b>", mol, "</b><br>",
-              "Mean: %{y:.3g} µg/L<br>",
+              "Mean: %{y:.3g} pg/mL<br>",
               "<span style='font-size:0.9em'>Range: [%{text}]</span>",
               "<extra></extra>"
             ),
@@ -196,7 +196,7 @@ mod_results_pk_server <- function(id, r) {
           ),
           yaxis = list(
             title = list(
-              text = if (input$log_scale) "Concentration [\u00b5g/L] (log)" else "Concentration [\u00b5g/L]",
+              text = if (input$log_scale) "Concentration [pg/mL] (log)" else "Concentration [pg/mL]",
               font = list(size = 12)
             ),
             type = if (input$log_scale) "log" else "linear",
@@ -258,17 +258,17 @@ mod_results_pk_server <- function(id, r) {
       )
 
       victim_cmax <- signif(
-        quantile(cmax_result$values * victim_molw, probs = c(0.05, .5, 0.95)),
+        quantile(cmax_result$values * victim_molw * 1000, probs = c(0.05, .5, 0.95)),
         4
-      ) # µmol/L -> µg/L
+      ) # µmol/L -> pg/mL
       victim_tmax <- signif(
         quantile(tmax_result$values, probs = c(0.05, .5, 0.95)),
         4
       ) # hours
       victim_auc <- signif(
-        quantile(auc_result$values * victim_molw / 60, probs = c(0.05, .5, 0.95)),
+        quantile(auc_result$values * victim_molw * 1000 / 60, probs = c(0.05, .5, 0.95)),
         4
-      ) # µmol*min/L -> µg*h/L
+      ) # µmol*min/L -> pg*h/mL
 
       # Dynamic tooltip based on which AUC parameter was used
       if (auc_result$param_used == "AUC_tDLast_minus_1_tDLast") {
@@ -281,14 +281,14 @@ mod_results_pk_server <- function(id, r) {
         width = 1 / 3,
         quantile_value_box(
           tooltip(
-            "Cmax (µg/L)",
+            "Cmax (pg/mL)",
             "Maximum concentration following the last application (Cmax_tDlast_tEnd): The highest concentration reached in plasma after the last dose."
           ),
           victim_cmax
         ),
         quantile_value_box(
           tooltip(
-            "AUC (µg*h/L)",
+            "AUC (pg*h/mL)",
             auc_tooltip_text
           ),
           victim_auc
