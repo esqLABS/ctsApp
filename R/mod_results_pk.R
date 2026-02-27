@@ -59,10 +59,12 @@ mod_results_pk_server <- function(id, r) {
           concentration = simulationValues * molWeight # concentration in µg/L
         )
 
+      perpetrator_label <- r$results$perpetrator_name %||% r$inputs$perpetrator
+
       if (!input$show_perpetrator) {
         plot_data <- dplyr::filter(
           plot_data,
-          stringr::str_detect(molecule, r$inputs$perpetrator, negate = TRUE)
+          stringr::str_detect(molecule, perpetrator_label, negate = TRUE)
         )
       }
 
@@ -148,7 +150,7 @@ mod_results_pk_server <- function(id, r) {
         plotly::layout(
           title = list(
             text = glue::glue(
-              "Concentration Time Profile of {r$inputs$victim}"
+              "Concentration Time Profile of {r$results$victim_name %||% r$inputs$victim}"
             ),
             font = list(
               size = 15,
@@ -210,22 +212,23 @@ mod_results_pk_server <- function(id, r) {
       req(r$results)
 
       vb_data <- r$results$pk_results$`DDI Simulation`
+      victim_label <- r$results$victim_name %||% r$inputs$victim
 
       cmax_result <- extract_pk_values(
-        vb_data, "C_max_tDLast_tEnd", "C_max", r$inputs$victim
+        vb_data, "C_max_tDLast_tEnd", "C_max", victim_label
       )
 
       victim_molw <- r$results$sim_results$`DDI Simulation` |>
-        dplyr::filter(stringr::str_detect(paths, r$inputs$victim)) |>
+        dplyr::filter(stringr::str_detect(paths, victim_label)) |>
         dplyr::pull(molWeight) |>
         unique()
 
       tmax_result <- extract_pk_values(
-        vb_data, "t_max_tDLast_tEnd", "t_max", r$inputs$victim
+        vb_data, "t_max_tDLast_tEnd", "t_max", victim_label
       )
 
       auc_result <- extract_pk_values(
-        vb_data, "AUC_tDLast_minus_1_tDLast", "AUC_tEnd", r$inputs$victim
+        vb_data, "AUC_tDLast_minus_1_tDLast", "AUC_tEnd", victim_label
       )
 
       victim_cmax <- signif(
