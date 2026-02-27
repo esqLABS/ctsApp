@@ -335,37 +335,55 @@ mod_formulation_server <- function(id, r) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    # Observe formulations - update dropdown when snapshot changes
-    observeEvent(r$snapshot_version, {
+    # Per-compound allowed formulations
+    compound_formulation_map <- list(
+      "Drospirenone"         = c("DRSP oral tablet"),
+      "Levonorgestrel"       = c("LNG low dose oral tablet", "LNG high dose oral tablet"),
+      "Itraconazole"         = c("ITZ oral tablet"),
+      "Ketoconazole_Vmax_Km" = c("KTZ oral tablet"),
+      "Ethinylestradiol"     = c("EE oral tablet"),
+      "Carbamazepine"        = c("CBZ oral tablet"),
+      "Rifampicin SHBG"      = c("RIF oral tablet"),
+      "Efavirenz"            = c("Efavirenz oral tablet")
+    )
+
+    # Determine which compound input to watch based on module id
+    compound_role <- sub("^formulation_", "", id)
+
+    # Update formulation dropdown based on selected compound
+    observe({
       req(r$default_snapshot)
-      
-      all_formulations <- r$default_snapshot$get_names("formulations")
-      
-      if (grepl("perpetrator", id)) {
-        updateSelectInput(
-          inputId = "formulation",
-          choices = c(all_formulations, "Create New Formulation"),
-          selected = "ITZ oral tablet"
-        )
+      # Depend on snapshot_version to ensure updates when compounds are uploaded
+      req(r$snapshot_version)
+
+      if (compound_role == "ee") {
+        # EE is always Ethinylestradiol
+        selected_compound <- "Ethinylestradiol"
       } else {
-        # Victim and EE formulations - filter to DRSP, LNG, or EE
-        filtered_formulations <- stringr::str_subset(
-          all_formulations,
-          pattern = "DRSP|LNG|EE"
-        )
-
-        selected_formulation <- if (grepl("ee", id)) {
-          "EE oral tablet"
-        } else {
-          "DRSP oral tablet"
-        }
-
-        updateSelectInput(
-          inputId = "formulation",
-          choices = c(filtered_formulations, "Create New Formulation"),
-          selected = selected_formulation
-        )
+        # Handle NULL case when "Upload Compound" is selected
+        selected_compound <- r$inputs[[compound_role]]
       }
+
+      # Determine allowed formulations based on selected compound
+      if (!is.null(selected_compound)) {
+        allowed <- compound_formulation_map[[selected_compound]]
+        if (is.null(allowed)) {
+          # Fallback for uploaded/unknown compounds: show all formulations
+          allowed <- r$default_snapshot$get_names("formulations")
+        }
+      } else {
+        # When no compound is selected (e.g., "Upload Compound"), show all formulations
+        allowed <- r$default_snapshot$get_names("formulations")
+      }
+
+      # Default selection: first allowed formulation
+      selected_formulation <- allowed[1]
+
+      updateSelectInput(
+        inputId = "formulation",
+        choices = c(allowed, "Create New Formulation"),
+        selected = selected_formulation
+      )
     })
 
     observe({

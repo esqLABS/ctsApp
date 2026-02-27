@@ -142,37 +142,58 @@ mod_protocol_server <- function(id, r) {
   moduleServer(id, function(input, output, session) {
     ns <- session$ns
 
-    # Observe protocols - update dropdown when snapshot changes
-    observeEvent(r$snapshot_version, {
+    # Per-compound allowed protocols
+    compound_protocol_map <- list(
+      "Drospirenone"         = c("DRSP_3mg 21 days"),
+      "Levonorgestrel"       = c("LNG 0.03 mg 28 days", "LNG_150 ug_21 Days",
+                                  "LNG_100 ug_21 Days", "LNG 0.75 mg single dose"),
+      "Itraconazole"         = c("ITZ 100mg 10 days", "ITZ 200mg 10 days",
+                                  "ITZ 200mg 21 days", "ITZ 100mg 21 days"),
+      "Ketoconazole_Vmax_Km" = c("KTZ 400 mg 28 days"),
+      "Ethinylestradiol"     = c("EE 30ug 21 days", "EE 20ug 21 days"),
+      "Carbamazepine"        = c("CBZ 400mg 10 days", "CBZ 400mg 21 days"),
+      "Rifampicin SHBG"      = c("Rifampicin 600mg 10 days", "Rifampicin 600mg 21 days"),
+      "Efavirenz"            = c("Efavirenz 600 mg for 14 days", "Efavirenz 600 mg for 10 days",
+                                  "Efavirenz 600 mg for 21 days")
+    )
+
+    # Determine which compound input to watch based on module id
+    compound_role <- sub("^protocol_", "", id)
+
+    # Update protocol dropdown based on selected compound
+    observe({
       req(r$default_snapshot)
-      
-      all_protocols <- r$default_snapshot$get_names("protocols")
-      
-      if (grepl("perpetrator", id)) {
-        updateSelectInput(
-          inputId = "protocol",
-          choices = c(all_protocols, "Create New Protocol"),
-          selected = "ITZ 100mg 10 days"
-        )
+      # Depend on snapshot_version to ensure updates when compounds are uploaded
+      req(r$snapshot_version)
+
+      if (compound_role == "ee") {
+        # EE is always Ethinylestradiol
+        selected_compound <- "Ethinylestradiol"
       } else {
-        # Victim and EE protocols - filter to DRSP, LNG, or EE
-        filtered_protocols <- stringr::str_subset(
-          all_protocols,
-          pattern = "DRSP|LNG|EE"
-        )
-
-        selected_protocol <- if (grepl("ee", id)) {
-          "EE 30ug 21 days"
-        } else {
-          "DRSP_3mg 21 days"
-        }
-
-        updateSelectInput(
-          inputId = "protocol",
-          choices = c(filtered_protocols, "Create New Protocol"),
-          selected = selected_protocol
-        )
+        # Handle NULL case when "Upload Compound" is selected
+        selected_compound <- r$inputs[[compound_role]]
       }
+
+      # Determine allowed protocols based on selected compound
+      if (!is.null(selected_compound)) {
+        allowed <- compound_protocol_map[[selected_compound]]
+        if (is.null(allowed)) {
+          # Fallback for uploaded/unknown compounds: show all protocols
+          allowed <- r$default_snapshot$get_names("protocols")
+        }
+      } else {
+        # When no compound is selected (e.g., "Upload Compound"), show all protocols
+        allowed <- r$default_snapshot$get_names("protocols")
+      }
+
+      # Default selection: first allowed protocol
+      selected_protocol <- allowed[1]
+
+      updateSelectInput(
+        inputId = "protocol",
+        choices = c(allowed, "Create New Protocol"),
+        selected = selected_protocol
+      )
     })
 
     observe({

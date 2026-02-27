@@ -158,12 +158,25 @@ mod_compound_server <- function(id, r) {
       )
     })
 
+    # Display name mapping for compounds
+    compound_display_names <- c(
+      "Ketoconazole_Vmax_Km" = "Ketoconazole",
+      "Itraconazole" = "Itraconazole (incl. metabolites)"
+    )
+
+    # Compounds to hide (metabolites)
+    hidden_compounds <- c(
+      "Hydroxy-Itraconazole",
+      "Keto-Itraconazole",
+      "N-desalkyl-Itraconazole"
+    )
+
     # Observe compounds - update dropdown when snapshot changes
     observeEvent(r$snapshot_version, {
       req(r$default_snapshot)
-      
+
       compound_names <- r$default_snapshot$get_names("compounds")
-      
+
       if (id == "victim") {
         compound_names <- stringr::str_subset(
           compound_names,
@@ -175,13 +188,23 @@ mod_compound_server <- function(id, r) {
           selected = "Drospirenone"
         )
       } else if (id == "perpetrator") {
+        # Exclude victim compounds and metabolites
         compound_names <- stringr::str_subset(
           compound_names,
           pattern = "Drospirenone|Levonorgestrel",
           negate = TRUE
         )
-        compound_names <- c("Upload Compound", compound_names)
-        
+        compound_names <- compound_names[!compound_names %in% hidden_compounds]
+
+        # Build named choices: display names as names, internal names as values
+        display_names <- ifelse(
+          compound_names %in% names(compound_display_names),
+          compound_display_names[compound_names],
+          compound_names
+        )
+        named_choices <- setNames(compound_names, display_names)
+        named_choices <- c("Upload Compound" = "Upload Compound", named_choices)
+
         # Use tracked selection if available, otherwise default to Itraconazole
         selected_compound <- if (!is.null(r$perpetrator_selected_compound)) {
           sel <- r$perpetrator_selected_compound
@@ -190,10 +213,10 @@ mod_compound_server <- function(id, r) {
         } else {
           "Itraconazole"
         }
-        
+
         updateSelectInput(
           inputId = "compound",
-          choices = compound_names,
+          choices = named_choices,
           selected = selected_compound
         )
       }
