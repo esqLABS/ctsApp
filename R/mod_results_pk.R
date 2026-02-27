@@ -10,22 +10,44 @@
 mod_results_pk_ui <- function(id) {
   ns <- NS(id)
   tagList(
+    tags$script(HTML(sprintf("
+      $(document).on('shiny:busy', function() {
+        $('#%s').prop('disabled', true).parent().css('opacity', '0.5');
+        $('#%s').prop('disabled', true).parent().css('opacity', '0.5');
+        $('#%s').css({'opacity': '0.5', 'pointer-events': 'none'});
+      });
+      $(document).on('shiny:idle', function() {
+        $('#%s').prop('disabled', false).parent().css('opacity', '1');
+        $('#%s').prop('disabled', false).parent().css('opacity', '1');
+        $('#%s').css({'opacity': '1', 'pointer-events': 'auto'});
+      });
+    ", ns("show_perpetrator"), ns("log_scale"), ns("plot_wrapper"),
+       ns("show_perpetrator"), ns("log_scale"), ns("plot_wrapper")))),
     uiOutput(ns("value_boxes")),
     card(
       fill = TRUE,
-      # card_header(
-      #   class = "d-flex justify-content-between",
-      #   "Time Profile",
-      # ),
       card_body(
         fillable = TRUE,
-        checkboxInput(
-          ns("show_perpetrator"),
-          "Show Perpetrator",
-          FALSE,
-          width = "auto"
+        div(
+          class = "d-flex gap-3",
+          checkboxInput(
+            ns("show_perpetrator"),
+            "Show Perpetrator",
+            FALSE,
+            width = "auto"
+          ),
+          checkboxInput(
+            ns("log_scale"),
+            "Log Scale Y-Axis",
+            FALSE,
+            width = "auto"
+          )
         ),
-        plotlyOutput(ns("plot"), height = "100%")
+        div(
+          id = ns("plot_wrapper"),
+          style = "flex: 1 1 auto; min-height: 0; height: 100%;",
+          plotlyOutput(ns("plot"), height = "100%")
+        )
       )
     )
   )
@@ -59,10 +81,12 @@ mod_results_pk_server <- function(id, r) {
           concentration = simulationValues * molWeight # concentration in µg/L
         )
 
+      perpetrator_label <- r$results$perpetrator_name %||% r$inputs$perpetrator
+
       if (!input$show_perpetrator) {
         plot_data <- dplyr::filter(
           plot_data,
-          stringr::str_detect(molecule, r$inputs$perpetrator, negate = TRUE)
+          stringr::str_detect(molecule, perpetrator_label, negate = TRUE)
         )
       }
 
@@ -148,7 +172,7 @@ mod_results_pk_server <- function(id, r) {
         plotly::layout(
           title = list(
             text = glue::glue(
-              "Concentration Time Profile of {r$inputs$victim}"
+              "Concentration Time Profile of {r$results$victim_name %||% r$inputs$victim}"
             ),
             font = list(
               size = 15,
@@ -171,7 +195,11 @@ mod_results_pk_server <- function(id, r) {
             zerolinewidth = 2
           ),
           yaxis = list(
-            title = list(text = "Concentration [µg/L]", font = list(size = 12)),
+            title = list(
+              text = if (input$log_scale) "Concentration [\u00b5g/L] (log)" else "Concentration [\u00b5g/L]",
+              font = list(size = 12)
+            ),
+            type = if (input$log_scale) "log" else "linear",
             gridcolor = "#f7fafc",
             gridwidth = 1,
             zerolinecolor = "#e2e8f0",
@@ -210,22 +238,23 @@ mod_results_pk_server <- function(id, r) {
       req(r$results)
 
       vb_data <- r$results$pk_results$`DDI Simulation`
+      victim_label <- r$results$victim_name %||% r$inputs$victim
 
       cmax_result <- extract_pk_values(
-        vb_data, "C_max_tDLast_tEnd", "C_max", r$inputs$victim
+        vb_data, "C_max_tDLast_tEnd", "C_max", victim_label
       )
 
       victim_molw <- r$results$sim_results$`DDI Simulation` |>
-        dplyr::filter(stringr::str_detect(paths, r$inputs$victim)) |>
+        dplyr::filter(stringr::str_detect(paths, victim_label)) |>
         dplyr::pull(molWeight) |>
         unique()
 
       tmax_result <- extract_pk_values(
-        vb_data, "t_max_tDLast_tEnd", "t_max", r$inputs$victim
+        vb_data, "t_max_tDLast_tEnd", "t_max", victim_label
       )
 
       auc_result <- extract_pk_values(
-        vb_data, "AUC_tDLast_minus_1_tDLast", "AUC_tEnd", r$inputs$victim
+        vb_data, "AUC_tDLast_minus_1_tDLast", "AUC_tEnd", victim_label
       )
 
       victim_cmax <- signif(

@@ -247,6 +247,8 @@ mod_simulation_server <- function(id, r) {
 
       r$inputs$run_btn <- input$run
       r$results$sim_results <- cts::run_ddi(r$ddi)
+      r$results$victim_name <- r$inputs$victim
+      r$results$perpetrator_name <- r$inputs$perpetrator
 
       showNotification(
         "Computing PK analysis...",

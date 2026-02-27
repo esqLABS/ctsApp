@@ -153,10 +153,12 @@ load_default_results <- function() {
         "Saved on {saved_data$metadata$platform} at {saved_data$metadata$timestamp}"
       )
 
-      # Return just the results (not metadata)
+      # Return results with compound names from metadata
       list(
         sim_results = saved_data$sim_results,
-        pk_results = saved_data$pk_results
+        pk_results = saved_data$pk_results,
+        victim_name = saved_data$metadata$victim,
+        perpetrator_name = saved_data$metadata$perpetrator
       )
     },
     error = function(e) {

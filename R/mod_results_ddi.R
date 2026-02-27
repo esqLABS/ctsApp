@@ -11,18 +11,44 @@ mod_results_ddi_ui <- function(id) {
   ns <- NS(id)
 
   tagList(
+    tags$script(HTML(sprintf("
+      $(document).on('shiny:busy', function() {
+        $('#%s').prop('disabled', true).parent().css('opacity', '0.5');
+        $('#%s').prop('disabled', true).parent().css('opacity', '0.5');
+        $('#%s').css({'opacity': '0.5', 'pointer-events': 'none'});
+      });
+      $(document).on('shiny:idle', function() {
+        $('#%s').prop('disabled', false).parent().css('opacity', '1');
+        $('#%s').prop('disabled', false).parent().css('opacity', '1');
+        $('#%s').css({'opacity': '1', 'pointer-events': 'auto'});
+      });
+    ", ns("show_perpetrator"), ns("log_scale"), ns("plot_wrapper"),
+       ns("show_perpetrator"), ns("log_scale"), ns("plot_wrapper")))),
     uiOutput(ns("value_boxes")),
     card(
       fill = TRUE,
       card_body(
         fillable = TRUE,
-        checkboxInput(
-          ns("show_perpetrator"),
-          "Show Perpetrator",
-          FALSE,
-          width = "auto"
+        div(
+          class = "d-flex gap-3",
+          checkboxInput(
+            ns("show_perpetrator"),
+            "Show Perpetrator",
+            FALSE,
+            width = "auto"
+          ),
+          checkboxInput(
+            ns("log_scale"),
+            "Log Scale Y-Axis",
+            FALSE,
+            width = "auto"
+          )
         ),
-        plotlyOutput(ns("plot"), height = "100%")
+        div(
+          id = ns("plot_wrapper"),
+          style = "flex: 1 1 auto; min-height: 0; height: 100%;",
+          plotlyOutput(ns("plot"), height = "100%")
+        )
       )
     )
   )
@@ -39,15 +65,17 @@ mod_results_ddi_server <- function(id, r) {
     output$plot <- renderPlotly({
       req(r$results)
 
+      perpetrator_label <- r$results$perpetrator_name %||% r$inputs$perpetrator
+
       plot_data <-
         dplyr::bind_rows(
           dplyr::mutate(
             .data = r$results$sim_results$`DDI Simulation`,
-            sim = glue::glue("With {r$inputs$perpetrator}")
+            sim = glue::glue("With {perpetrator_label}")
           ),
           dplyr::mutate(
             .data = r$results$sim_results$`Single Simulation`,
-            sim = glue::glue("Without {r$inputs$perpetrator}")
+            sim = glue::glue("Without {perpetrator_label}")
           )
         ) |>
         dplyr::filter(
@@ -68,7 +96,7 @@ mod_results_ddi_server <- function(id, r) {
       if (!input$show_perpetrator) {
         plot_data <- dplyr::filter(
           plot_data,
-          stringr::str_detect(molecule, r$inputs$perpetrator, negate = TRUE)
+          stringr::str_detect(molecule, perpetrator_label, negate = TRUE)
         )
       }
 
@@ -154,7 +182,7 @@ mod_results_ddi_server <- function(id, r) {
         plotly::layout(
           title = list(
             text = glue::glue(
-              "Concentration Time Profile of {r$inputs$victim}"
+              "Concentration Time Profile of {r$results$victim_name %||% r$inputs$victim}"
             ),
             font = list(
               size = 15,
@@ -177,7 +205,11 @@ mod_results_ddi_server <- function(id, r) {
             zerolinewidth = 2
           ),
           yaxis = list(
-            title = list(text = "Concentration [µg/L]", font = list(size = 12)),
+            title = list(
+              text = if (input$log_scale) "Concentration [\u00b5g/L] (log)" else "Concentration [\u00b5g/L]",
+              font = list(size = 12)
+            ),
+            type = if (input$log_scale) "log" else "linear",
             gridcolor = "#f7fafc",
             gridwidth = 1,
             zerolinecolor = "#e2e8f0",
@@ -216,26 +248,27 @@ mod_results_ddi_server <- function(id, r) {
 
       pk_data_ddi <- r$results$pk_results$`DDI Simulation`
       pk_data_single <- r$results$pk_results$`Single Simulation`
+      victim_label <- r$results$victim_name %||% r$inputs$victim
 
       auc_ddi_result <- extract_pk_values(
-        pk_data_ddi, "AUC_tDLast_minus_1_tDLast", "AUC_tEnd", r$inputs$victim
+        pk_data_ddi, "AUC_tDLast_minus_1_tDLast", "AUC_tEnd", victim_label
       )
       auc_single_result <- extract_pk_values(
-        pk_data_single, "AUC_tDLast_minus_1_tDLast", "AUC_tEnd", r$inputs$victim
+        pk_data_single, "AUC_tDLast_minus_1_tDLast", "AUC_tEnd", victim_label
       )
 
       cmax_ddi_result <- extract_pk_values(
-        pk_data_ddi, "C_max_tDLast_tEnd", "C_max", r$inputs$victim
+        pk_data_ddi, "C_max_tDLast_tEnd", "C_max", victim_label
       )
       cmax_single_result <- extract_pk_values(
-        pk_data_single, "C_max_tDLast_tEnd", "C_max", r$inputs$victim
+        pk_data_single, "C_max_tDLast_tEnd", "C_max", victim_label
       )
 
       tmax_ddi_result <- extract_pk_values(
-        pk_data_ddi, "t_max_tDLast_tEnd", "t_max", r$inputs$victim
+        pk_data_ddi, "t_max_tDLast_tEnd", "t_max", victim_label
       )
       tmax_single_result <- extract_pk_values(
-        pk_data_single, "t_max_tDLast_tEnd", "t_max", r$inputs$victim
+        pk_data_single, "t_max_tDLast_tEnd", "t_max", victim_label
       )
 
       auc_ratio <- signif(
