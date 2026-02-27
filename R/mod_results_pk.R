@@ -132,10 +132,10 @@ mod_results_pk_server <- function(id, r) {
             name = mol,
             legendgroup = mol,
             showlegend = TRUE,
-            text = ~paste0(round(min_conc, 2), " - ", round(max_conc, 2)),
+            text = ~paste0(signif(min_conc, 3), " - ", signif(max_conc, 3)),
             hovertemplate = paste0(
               "<b>", mol, "</b><br>",
-              "Mean: %{y:.2f} µg/L<br>",
+              "Mean: %{y:.3g} µg/L<br>",
               "<span style='font-size:0.9em'>Range: [%{text}]</span>",
               "<extra></extra>"
             ),
@@ -259,17 +259,17 @@ mod_results_pk_server <- function(id, r) {
         ),
         quantile_value_box(
           tooltip(
-            "Tmax (h)",
-            "Time to maximum concentration following the last application (tmax_tDlast-tEnd): The time at which Cmax is reached after the last dose."
-          ),
-          victim_tmax
-        ),
-        quantile_value_box(
-          tooltip(
             "AUC (µg*h/L)",
             auc_tooltip_text
           ),
           victim_auc
+        ),
+        quantile_value_box(
+          tooltip(
+            "Tmax (h)",
+            "Time to maximum concentration following the last application (tmax_tDlast-tEnd): The time at which Cmax is reached after the last dose."
+          ),
+          victim_tmax
         )
       )
     })

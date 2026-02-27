@@ -29,11 +29,6 @@ app_ui <- function(request) {
               mod_formulation_ui("formulation_victim")
             ),
             accordion_panel(
-              "Population",
-              icon = bs_icon("people fill"),
-              mod_population_ui("individual_1")
-            ),
-            accordion_panel(
               "Perpetrator",
               icon = bs_icon("prescription"),
               mod_compound_ui("perpetrator"),
@@ -53,6 +48,11 @@ app_ui <- function(request) {
                   mod_formulation_ui("formulation_ee")
                 )
               )
+            ),
+            accordion_panel(
+              "Population",
+              icon = bs_icon("people fill"),
+              mod_population_ui("individual_1")
             ),
             accordion_panel(
               "Simulation Parameters",
@@ -84,7 +84,7 @@ app_ui <- function(request) {
         mod_results_ui("results_1")
       ),
       nav_spacer(),
-      nav_item(tags$a(bs_icon("file-text"), "White Paper", href = "")),
+      nav_item(tags$a(bs_icon("file-text"), "White Paper", href = "https://pmc.ncbi.nlm.nih.gov/articles/PMC12649304/", target = "_blank")),
       nav_panel(
         title = "About",
         mod_about_ui("about_1")
@@ -92,9 +92,9 @@ app_ui <- function(request) {
       nav_menu(
         "More",
         align = "right",
-        nav_item(tags$a(bs_icon("github"), "Code Repository", href = "")),
-        nav_item(tags$a(bs_icon("flag"), "Report an Issue", href = "")),
-        nav_item(tags$a(bs_icon("envelope-at"), "Contact", href = ""))
+        nav_item(tags$a(bs_icon("github"), "Code Repository", href = "https://github.com/esqLABS/ctsApp", target = "_blank")),
+        nav_item(tags$a(bs_icon("flag"), "Report an Issue", href = "https://github.com/esqLABS/ctsApp/issues", target = "_blank")),
+        nav_item(tags$a(bs_icon("envelope-at"), "Contact", href = "https://www.esqlabs.com", target = "_blank"))
       )
     )
   )
