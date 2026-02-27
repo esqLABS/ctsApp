@@ -105,8 +105,8 @@ mod_simulation_server <- function(id, r) {
       
       model_ee <- r$model_ee %||% FALSE
       if (isTRUE(model_ee)) {
-        perpetrators_list <- c(perpetrators_list, "Ethinylestradiol 3.0")
-        output_compounds <- c(output_compounds, "Ethinylestradiol 3.0")
+        perpetrators_list <- c(perpetrators_list, "Ethinylestradiol")
+        output_compounds <- c(output_compounds, "Ethinylestradiol")
       }
       
       ddi_sim <-
@@ -131,7 +131,7 @@ mod_simulation_server <- function(id, r) {
       if (isTRUE(model_ee)) {
         ddi_sim <- ddi_sim |>
           cts::set_compound_protocol(
-            "Ethinylestradiol 3.0",
+            "Ethinylestradiol",
             protocol = r$protocol_ee$name,
             formulation = r$formulation_ee$name
           )
