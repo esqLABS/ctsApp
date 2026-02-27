@@ -353,19 +353,26 @@ mod_formulation_server <- function(id, r) {
     # Update formulation dropdown based on selected compound
     observe({
       req(r$default_snapshot)
+      # Watch snapshot_version to update when compounds are uploaded
+      r$snapshot_version
 
       if (compound_role == "ee") {
         # EE is always Ethinylestradiol
         selected_compound <- "Ethinylestradiol"
       } else {
-        req(r$inputs[[compound_role]])
+        # Handle NULL case when "Upload Compound" is selected
         selected_compound <- r$inputs[[compound_role]]
       }
 
-      allowed <- compound_formulation_map[[selected_compound]]
-      if (is.null(allowed)) {
-        # Fallback for uploaded/unknown compounds: show all formulations
+      # If no compound is selected, show all formulations
+      if (is.null(selected_compound)) {
         allowed <- r$default_snapshot$get_names("formulations")
+      } else {
+        allowed <- compound_formulation_map[[selected_compound]]
+        if (is.null(allowed)) {
+          # Fallback for uploaded/unknown compounds: show all formulations
+          allowed <- r$default_snapshot$get_names("formulations")
+        }
       }
 
       # Default selection: first allowed formulation

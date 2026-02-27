@@ -163,19 +163,26 @@ mod_protocol_server <- function(id, r) {
     # Update protocol dropdown based on selected compound
     observe({
       req(r$default_snapshot)
+      # Watch snapshot_version to update when compounds are uploaded
+      r$snapshot_version
 
       if (compound_role == "ee") {
         # EE is always Ethinylestradiol
         selected_compound <- "Ethinylestradiol"
       } else {
-        req(r$inputs[[compound_role]])
+        # Handle NULL case when "Upload Compound" is selected
         selected_compound <- r$inputs[[compound_role]]
       }
 
-      allowed <- compound_protocol_map[[selected_compound]]
-      if (is.null(allowed)) {
-        # Fallback for uploaded/unknown compounds: show all protocols
+      # If no compound is selected, show all protocols
+      if (is.null(selected_compound)) {
         allowed <- r$default_snapshot$get_names("protocols")
+      } else {
+        allowed <- compound_protocol_map[[selected_compound]]
+        if (is.null(allowed)) {
+          # Fallback for uploaded/unknown compounds: show all protocols
+          allowed <- r$default_snapshot$get_names("protocols")
+        }
       }
 
       # Default selection: first allowed protocol
