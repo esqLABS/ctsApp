@@ -354,6 +354,7 @@ mod_formulation_server <- function(id, r) {
     observe({
       req(r$default_snapshot)
       # Watch snapshot_version to update when compounds are uploaded
+      # Note: snapshot_version is initialized after default_snapshot, so it's safe to read here
       r$snapshot_version
 
       if (compound_role == "ee") {
