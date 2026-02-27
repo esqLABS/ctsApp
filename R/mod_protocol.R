@@ -21,7 +21,7 @@ mod_protocol_ui <- function(id) {
           # style = css(grid_template_columns = "1fr 2fr"),
           gap = "10px",
           numericInput(ns("dose"), "Dose", value = 1),
-          selectInput(ns("dose_unit"), "Unit", c("mg", "g"), selected = "mg")
+          selectInput(ns("dose_unit"), "Unit", c("mg", "g", "ug"), selected = "mg")
         ),
         layout_column_wrap(
           width = 1 / 2,
@@ -233,13 +233,20 @@ mod_protocol_server <- function(id, r) {
         # Create unique name based on module id (victim/perpetrator)
         protocol_name <- paste0("Custom Protocol (", tools::toTitleCase(gsub("protocol_", "", id)), ")")
 
+        # Convert dose to mg (cts backend only accepts "mg")
+        dose_in_mg <- switch(input$dose_unit,
+          "g"  = input$dose * 1000,
+          "ug" = input$dose / 1000,
+          input$dose
+        )
+
         r[[id]] <- rlang::inject(
           cts::create_protocol(
             name = protocol_name,
             type = input$protocol_type,
             interval = input$protocol_interval,
-            dose = input$dose,
-            dose_unit = input$dose_unit,
+            dose = dose_in_mg,
+            dose_unit = "mg",
             start_time = input$start_time,
             start_time_unit = input$start_time_unit,
             end_time = input$end_time,
