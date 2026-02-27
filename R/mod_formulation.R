@@ -354,8 +354,7 @@ mod_formulation_server <- function(id, r) {
     observe({
       req(r$default_snapshot)
       # Depend on snapshot_version to ensure updates when compounds are uploaded
-      snapshot_ver <- r$snapshot_version
-      req(!is.null(snapshot_ver))
+      req(r$snapshot_version)
 
       if (compound_role == "ee") {
         # EE is always Ethinylestradiol
