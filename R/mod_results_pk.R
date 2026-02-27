@@ -10,13 +10,22 @@
 mod_results_pk_ui <- function(id) {
   ns <- NS(id)
   tagList(
+    tags$script(HTML(sprintf("
+      $(document).on('shiny:busy', function() {
+        $('#%s').prop('disabled', true).parent().css('opacity', '0.5');
+        $('#%s').prop('disabled', true).parent().css('opacity', '0.5');
+        $('#%s').css({'opacity': '0.5', 'pointer-events': 'none'});
+      });
+      $(document).on('shiny:idle', function() {
+        $('#%s').prop('disabled', false).parent().css('opacity', '1');
+        $('#%s').prop('disabled', false).parent().css('opacity', '1');
+        $('#%s').css({'opacity': '1', 'pointer-events': 'auto'});
+      });
+    ", ns("show_perpetrator"), ns("log_scale"), ns("plot_wrapper"),
+       ns("show_perpetrator"), ns("log_scale"), ns("plot_wrapper")))),
     uiOutput(ns("value_boxes")),
     card(
       fill = TRUE,
-      # card_header(
-      #   class = "d-flex justify-content-between",
-      #   "Time Profile",
-      # ),
       card_body(
         fillable = TRUE,
         div(
@@ -34,7 +43,11 @@ mod_results_pk_ui <- function(id) {
             width = "auto"
           )
         ),
-        plotlyOutput(ns("plot"), height = "100%")
+        div(
+          id = ns("plot_wrapper"),
+          style = "flex: 1 1 auto; min-height: 0; height: 100%;",
+          plotlyOutput(ns("plot"), height = "100%")
+        )
       )
     )
   )
