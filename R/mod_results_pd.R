@@ -25,7 +25,8 @@ mod_results_pd_server <- function(id, r) {
     output$value_boxes <- renderUI({
       req(r$results)
 
-      victim <- r$inputs$victim
+      victim <- r$results$victim_name %||% r$inputs$victim
+      perpetrator_label <- r$results$perpetrator_name %||% r$inputs$perpetrator
 
       # PD analysis requires repeated dosing to compute steady-state Cavg
       if (is_single_dose(r$protocol_victim)) {
@@ -88,7 +89,7 @@ mod_results_pd_server <- function(id, r) {
       )
 
       tagList(
-        h5(glue::glue("With {r$inputs$perpetrator} (DDI Simulation)")),
+        h5(glue::glue("With {perpetrator_label} (DDI Simulation)")),
         layout_column_wrap(
           width = 1 / 2,
           quantile_value_box(
@@ -106,7 +107,7 @@ mod_results_pd_server <- function(id, r) {
             or_q_ddi
           )
         ),
-        h5(glue::glue("Without {r$inputs$perpetrator} (Victim Only Simulation)")),
+        h5(glue::glue("Without {perpetrator_label} (Victim Only Simulation)")),
         layout_column_wrap(
           width = 1 / 2,
           quantile_value_box(
