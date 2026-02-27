@@ -19,11 +19,20 @@ mod_results_pk_ui <- function(id) {
       # ),
       card_body(
         fillable = TRUE,
-        checkboxInput(
-          ns("show_perpetrator"),
-          "Show Perpetrator",
-          FALSE,
-          width = "auto"
+        div(
+          class = "d-flex gap-3",
+          checkboxInput(
+            ns("show_perpetrator"),
+            "Show Perpetrator",
+            FALSE,
+            width = "auto"
+          ),
+          checkboxInput(
+            ns("log_scale"),
+            "Log Scale Y-Axis",
+            FALSE,
+            width = "auto"
+          )
         ),
         plotlyOutput(ns("plot"), height = "100%")
       )
@@ -173,7 +182,11 @@ mod_results_pk_server <- function(id, r) {
             zerolinewidth = 2
           ),
           yaxis = list(
-            title = list(text = "Concentration [µg/L]", font = list(size = 12)),
+            title = list(
+              text = if (input$log_scale) "Concentration [\u00b5g/L] (log)" else "Concentration [\u00b5g/L]",
+              font = list(size = 12)
+            ),
+            type = if (input$log_scale) "log" else "linear",
             gridcolor = "#f7fafc",
             gridwidth = 1,
             zerolinecolor = "#e2e8f0",
