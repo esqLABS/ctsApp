@@ -138,10 +138,10 @@ mod_results_ddi_server <- function(id, r) {
             name = tl,
             legendgroup = tl,
             showlegend = TRUE,
-            text = ~paste0(round(min_conc, 2), " - ", round(max_conc, 2)),
+            text = ~paste0(signif(min_conc, 3), " - ", signif(max_conc, 3)),
             hovertemplate = paste0(
               "<b>", tl, "</b><br>",
-              "Mean: %{y:.2f} µg/L<br>",
+              "Mean: %{y:.3g} µg/L<br>",
               "<span style='font-size:0.9em'>Range: [%{text}]</span>",
               "<extra></extra>"
             ),
@@ -262,8 +262,8 @@ mod_results_ddi_server <- function(id, r) {
 
       layout_column_wrap(
         width = 1 / 3,
-        quantile_value_box("AUC ratio", auc_ratio),
         quantile_value_box("Cmax ratio", cmax_ratio),
+        quantile_value_box("AUC ratio", auc_ratio),
         quantile_value_box("Tmax ratio", tmax_ratio)
       )
     })
