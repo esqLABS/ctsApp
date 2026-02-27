@@ -353,8 +353,9 @@ mod_formulation_server <- function(id, r) {
     # Update formulation dropdown based on selected compound
     observe({
       req(r$default_snapshot)
-      # Add dependency on snapshot_version to ensure updates when compounds are uploaded
-      r$snapshot_version
+      # Depend on snapshot_version to ensure updates when compounds are uploaded
+      snapshot_ver <- r$snapshot_version
+      req(!is.null(snapshot_ver))
 
       if (compound_role == "ee") {
         # EE is always Ethinylestradiol
