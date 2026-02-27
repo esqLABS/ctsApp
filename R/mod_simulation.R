@@ -230,32 +230,46 @@ mod_simulation_server <- function(id, r) {
       }
     })
 
-    # Run simulation button handler
-    observeEvent(input$run, {
-      # Show busy notification
-      notif_id <- showNotification(
-        "Running simulation... This may take a moment.",
-        type = "message",
-        duration = NULL,
-        closeButton = FALSE
-      )
-      on.exit(removeNotification(notif_id), add = TRUE)
+    # ExtendedTask for non-blocking simulation execution
+    simulation_task <- ExtendedTask$new(function(ddi) {
+      promises::future_promise({
+        sim_results <- cts::run_ddi(ddi)
+        pk_results <- cts::run_pk_analysis(ddi)
+        list(
+          sim_results = sim_results,
+          pk_results = pk_results,
+          ddi = ddi
+        )
+      })
+    }) |> bind_task_button("run")
 
-      # Run simulation
+    # Run simulation button handler — prepares DDI then invokes async task
+    observeEvent(input$run, {
       r$ddi <- create_ddi()
       req(r$ddi)
-
       r$inputs$run_btn <- input$run
-      r$results$sim_results <- cts::run_ddi(r$ddi)
 
       showNotification(
-        "Computing PK analysis...",
+        "Simulation running in background... UI remains interactive.",
         type = "message",
-        duration = 3,
-        closeButton = FALSE
+        duration = 5
       )
 
-      r$results$pk_results <- cts::run_pk_analysis(r$ddi)
+      simulation_task$invoke(r$ddi)
+    })
+
+    # Observe task completion and update results
+    observeEvent(simulation_task$result(), {
+      result <- simulation_task$result()
+      r$results$sim_results <- result$sim_results
+      r$results$pk_results <- result$pk_results
+      r$ddi <- result$ddi
+
+      showNotification(
+        "Simulation complete!",
+        type = "message",
+        duration = 3
+      )
 
       # Automatically save results if toggle is enabled
       save_enabled <- tryCatch(
