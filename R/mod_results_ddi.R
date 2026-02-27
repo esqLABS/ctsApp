@@ -89,7 +89,7 @@ mod_results_ddi_server <- function(id, r) {
             paths,
             pattern = "(?<=VenousBlood\\|)[^\\|]*"
           ),
-          concentration = simulationValues * molWeight, # concentration in µg/L
+          concentration = simulationValues * molWeight * 1000, # concentration in pg/mL
           sim = sim
         )
 
@@ -169,7 +169,7 @@ mod_results_ddi_server <- function(id, r) {
             text = ~paste0(signif(min_conc, 3), " - ", signif(max_conc, 3)),
             hovertemplate = paste0(
               "<b>", tl, "</b><br>",
-              "Mean: %{y:.3g} µg/L<br>",
+              "Mean: %{y:.3g} pg/mL<br>",
               "<span style='font-size:0.9em'>Range: [%{text}]</span>",
               "<extra></extra>"
             ),
@@ -206,7 +206,7 @@ mod_results_ddi_server <- function(id, r) {
           ),
           yaxis = list(
             title = list(
-              text = if (input$log_scale) "Concentration [\u00b5g/L] (log)" else "Concentration [\u00b5g/L]",
+              text = if (input$log_scale) "Concentration [pg/mL] (log)" else "Concentration [pg/mL]",
               font = list(size = 12)
             ),
             type = if (input$log_scale) "log" else "linear",

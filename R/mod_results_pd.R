@@ -178,7 +178,7 @@ calculate_pd <- function(Cavg, BL, Imax, Kd, tau, hill) {
 get_pd_params <- function(victim) {
   if (victim == "Drospirenone") {
     list(Kd = 2.949, tau_pi = 2.602, tau_or = 1.867)
-  } else if (victim == "Levonorgestrel 1") {
+  } else if (victim == "Levonorgestrel") {
     list(Kd = 3.556, tau_pi = 3.046, tau_or = 2.172)
   } else {
     NULL
