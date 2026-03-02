@@ -45,5 +45,5 @@ LazyData: true
 RoxygenNote: 7.3.3
 Remotes:  
     cts=esqLABS/cts,
-    osp.snapshots=esqLABS/osp.snapshots@*release,
-    ospsuite=Open-Systems-Pharmacology/OSPSuite-R@*release
+    osp.snapshots=esqLABS/osp.snapshots,
+    ospsuite=Open-Systems-Pharmacology/OSPSuite-R
